@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mockup Studio</title>
+    <style>
+        body { font-family: sans-serif; background-color: #222; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        .sidebar { width: 300px; background: #111; padding: 20px; box-sizing: border-box; overflow-y: auto; border-right: 1px solid #444; display: flex; flex-direction: column; gap: 20px; }
+        .main-content { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
+        
+        h2, h3 { margin-top: 0; color: #00ffcc; }
+        
+        .panel { background: #333; padding: 15px; border-radius: 8px; }
+        button { background: #00ffcc; color: #000; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; transition: background 0.2s;}
+        button:hover { background: #00ccaa; }
+        button.danger { background: #ff4444; color: white; }
+        button.danger:hover { background: #cc3333; }
+        button.active { background: #ff00cc; color: white; }
+        
+        .file-upload { display: block; margin-bottom: 10px; }
+        .file-upload input { display: none; }
+        .file-upload label { display: block; background: #444; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; border: 1px dashed #888; }
+        .file-upload label:hover { background: #555; }
+        
+        .list-group { list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; background: #222; border-radius: 4px; }
+        .list-group li { padding: 10px; border-bottom: 1px solid #333; cursor: pointer; }
+        .list-group li:hover { background: #444; }
+        .list-group li.selected { background: #00ffcc; color: #000; font-weight: bold; }
+
+        .workspace-container { 
+            position: relative; margin-top: 20px; border: 2px dashed #666; 
+            background: #111; display: inline-block; user-select: none;
+            max-width: 100%; max-height: 80vh;
+        }
+        
+        #tshirt-img { display: block; max-width: 100%; max-height: 80vh; height: auto; pointer-events: none; }
+
+        #clip-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; clip-path: url(#my-clip); -webkit-clip-path: url(#my-clip);
+        }
+        
+        #design-img { position: absolute; top: 0; left: 0; transform-origin: 0 0; opacity: 0.85; pointer-events: none; display: none; }
+
+        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; overflow: visible; }
+        
+        #poly-visible { fill: rgba(0, 255, 204, 0.1); stroke: #00ffcc; stroke-width: 2; stroke-dasharray: 4; cursor: move; pointer-events: fill; }
+        #poly-mask { fill: rgba(255, 0, 0, 0.1); stroke: #ff4444; stroke-width: 2; pointer-events: none; }
+        .mask-point { fill: #ff4444; pointer-events: fill; cursor: pointer; }
+        
+        .edge-line { stroke: transparent; stroke-width: 15; pointer-events: fill; }
+        .edge-line.horizontal { cursor: ns-resize; }
+        .edge-line.vertical { cursor: ew-resize; }
+
+        .handle {
+            position: absolute; width: 20px; height: 20px; background: #00ffcc; 
+            border: 2px solid #fff; border-radius: 50%; 
+            transform: translate(-50%, -50%); cursor: grab;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5); z-index: 20;
+        }
+        .handle:active { cursor: grabbing; background: #ff00cc; }
+        
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; color: white; justify-content: center; align-items: center; font-size: 24px; flex-direction: column; }
+        .spinner { border: 8px solid #333; border-top: 8px solid #00ffcc; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 20px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div id="loader-text">İşleniyor...</div>
+    </div>
+
+    <div class="sidebar">
+        <h2>Mockup Studio</h2>
+        
+        <div class="panel">
+            <h3>Şablonlar (Arkaplan)</h3>
+            <ul class="list-group" id="bg-list"></ul>
+            <div class="file-upload" style="margin-top: 10px;">
+                <label>
+                    Yeni Şablon Yükle
+                    <input type="file" id="upload-bg" accept="image/*">
+                </label>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3>Tasarımlar (Baskı)</h3>
+            <div class="file-upload">
+                <label>
+                    Tasarım Yükle (Çoklu)
+                    <input type="file" id="upload-designs-bulk" accept="image/*" multiple>
+                </label>
+            </div>
+            <p style="font-size: 12px; color: #aaa; margin: 0;">Bu tasarımlar seçili tüm şablonlara basılacaktır.</p>
+        </div>
+
+        <div class="panel">
+            <h3>Ayarlar</h3>
+            <button id="btn-draw-mask" class="danger">Manuel Kırpma Çiz</button>
+            <button id="btn-clear-mask" style="background: #555;">Kırpmayı Temizle</button>
+            <button id="btn-save" style="margin-top: 10px;">Ayarları Kaydet</button>
+        </div>
+        
+        <div class="panel">
+            <h3>Yapay Zeka Araçları</h3>
+            <div class="file-upload">
+                <label>
+                    Arkaplanı Temizle (rembg)
+                    <input type="file" id="upload-rembg" accept="image/*">
+                </label>
+            </div>
+            <p style="font-size: 12px; color: #aaa; margin: 0;">(Görselin arka planını siler ve Tasarımlar klasörüne kaydeder)</p>
+        </div>
+
+        <div class="panel">
+            <h3>Üretim</h3>
+            <button id="btn-generate" class="active">Tüm Mockupları Üret</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div style="width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center;">
+            <h3 id="current-bg-title">Şablon Seçiniz</h3>
+            <div class="file-upload" style="margin: 0;">
+                <label style="padding: 5px 10px;">
+                    Önizleme Tasarımı Değiştir
+                    <input type="file" id="upload-design" accept="image/*">
+                </label>
+            </div>
+        </div>
+
+        <div class="workspace-container" id="workspace">
+            <img id="tshirt-img" src="" alt="Tişört buraya gelecek" style="display:none;">
+            
+            <svg width="0" height="0" style="position:absolute;">
+                <defs>
+                    <clipPath id="my-clip">
+                        <polygon id="poly-clip" points="0,0 0,0 0,0 0,0" />
+                    </clipPath>
+                </defs>
+            </svg>
+
+            <div id="clip-container">
+                <img id="design-img" src="" alt="Tasarım önizleme">
+            </div>
+
+            <svg id="svg-overlay" style="display:none;">
+                <polygon id="poly-mask" points="" />
+                <g id="mask-points-group"></g>
+
+                <polygon id="poly-visible" points="0,0 0,0 0,0 0,0" />
+                <line id="edge-top" class="edge-line horizontal" x1="0" y1="0" x2="0" y2="0" />
+                <line id="edge-right" class="edge-line vertical" x1="0" y1="0" x2="0" y2="0" />
+                <line id="edge-bottom" class="edge-line horizontal" x1="0" y1="0" x2="0" y2="0" />
+                <line id="edge-left" class="edge-line vertical" x1="0" y1="0" x2="0" y2="0" />
+            </svg>
+
+            <div class="handle" id="pt-tl" style="display:none;" title="Sol Üst"></div>
+            <div class="handle" id="pt-tr" style="display:none;" title="Sağ Üst"></div>
+            <div class="handle" id="pt-br" style="display:none;" title="Sağ Alt"></div>
+            <div class="handle" id="pt-bl" style="display:none;" title="Sol Alt"></div>
+        </div>
+    </div>
+
+    <script>
+        const bgList = document.getElementById('bg-list');
+        const currentBgTitle = document.getElementById('current-bg-title');
+        const tshirtImg = document.getElementById('tshirt-img');
+        const designImg = document.getElementById('design-img');
+        const svgOverlay = document.getElementById('svg-overlay');
+        const workspace = document.getElementById('workspace');
+        const loader = document.getElementById('loader');
+        const loaderText = document.getElementById('loader-text');
+
+        let currentBgFile = null;
+        let globalConfig = {};
+        
+        let points = [{x: 100, y: 100}, {x: 300, y: 100}, {x: 300, y: 350}, {x: 100, y: 350}];
+        let maskPoints = [];
+        let isDrawingMask = false;
+        
+        let imgNaturalWidth = 1, imgNaturalHeight = 1;
+        let designW = 100, designH = 100;
+
+        // UI elemanları
+        const handles = [
+            document.getElementById('pt-tl'), document.getElementById('pt-tr'),
+            document.getElementById('pt-br'), document.getElementById('pt-bl')
+        ];
+        const edges = [
+            document.getElementById('edge-top'), document.getElementById('edge-right'),
+            document.getElementById('edge-bottom'), document.getElementById('edge-left')
+        ];
+        const polyVisible = document.getElementById('poly-visible');
+        const polyClip = document.getElementById('poly-clip');
+        const polyMask = document.getElementById('poly-mask');
+        const maskPointsGroup = document.getElementById('mask-points-group');
+
+        let draggingType = null; 
+        let draggingIdx = -1;
+        let dragStartX = 0, dragStartY = 0;
+        let originalPoints = [];
+
+        // Başlangıç Yüklemeleri
+        async function loadBackgrounds() {
+            const res = await fetch('/api/backgrounds');
+            const files = await res.json();
+            bgList.innerHTML = '';
+            files.forEach(file => {
+                const li = document.createElement('li');
+                li.innerText = file;
+                li.onclick = () => selectBackground(file, li);
+                bgList.appendChild(li);
+            });
+        }
+
+        async function loadConfig() {
+            const res = await fetch('/api/config');
+            globalConfig = await res.json();
+        }
+
+        async function init() {
+            await loadConfig();
+            await loadBackgrounds();
+        }
+
+        function showLoader(text) {
+            loaderText.innerText = text;
+            loader.style.display = 'flex';
+        }
+        function hideLoader() {
+            loader.style.display = 'none';
+        }
+
+        function selectBackground(filename, liElement) {
+            document.querySelectorAll('.list-group li').forEach(li => li.classList.remove('selected'));
+            if(liElement) liElement.classList.add('selected');
+            
+            currentBgFile = filename;
+            currentBgTitle.innerText = "Düzenlenen: " + filename;
+            
+            tshirtImg.onload = () => {
+                imgNaturalWidth = tshirtImg.naturalWidth;
+                imgNaturalHeight = tshirtImg.naturalHeight;
+                tshirtImg.style.display = 'block';
+                svgOverlay.style.display = 'block';
+                handles.forEach(h => h.style.display = 'block');
+                
+                const rect = tshirtImg.getBoundingClientRect();
+                const scaleX = rect.width / imgNaturalWidth;
+                const scaleY = rect.height / imgNaturalHeight;
+
+                // Configden noktaları yükle veya varsayılan at
+                if (globalConfig[filename] && globalConfig[filename].points) {
+                    const cfgPoints = globalConfig[filename].points;
+                    points = cfgPoints.map(p => ({ x: p[0] * scaleX, y: p[1] * scaleY }));
+                    
+                    if (globalConfig[filename].mask_points) {
+                        maskPoints = globalConfig[filename].mask_points.map(p => ({ x: p[0] * scaleX, y: p[1] * scaleY }));
+                    } else {
+                        maskPoints = [];
+                    }
+                } else {
+                    const w = rect.width;
+                    const h = rect.height;
+                    points = [
+                        {x: w*0.3, y: h*0.3}, {x: w*0.7, y: h*0.3},
+                        {x: w*0.7, y: h*0.7}, {x: w*0.3, y: h*0.7}
+                    ];
+                    maskPoints = [];
+                }
+                
+                // Canvas için referans yükle (tasarımlar klasöründen canvas.png bulabilirsek veya ilk yüklenen)
+                // Şimdilik varsayılan boş bir placeholder veya seçili resim varsa onu kullan
+                updateUI();
+            };
+            tshirtImg.src = '/backgrounds/' + filename;
+        }
+
+        // Tasarım Değiştirme (Geçici Önizleme İçin)
+        document.getElementById('upload-design').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                designImg.onload = () => {
+                    designW = designImg.naturalWidth;
+                    designH = designImg.naturalHeight;
+                    designImg.style.display = 'block';
+                    designImg.style.width = designW + 'px';
+                    designImg.style.height = designH + 'px';
+                    updateUI();
+                }
+                designImg.src = url;
+            }
+        });
+
+        // Toplu Tasarım Yükleme (Üretim İçin)
+        document.getElementById('upload-designs-bulk').addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (files.length > 0) {
+                showLoader("Tasarımlar Yükleniyor...");
+                for (let file of files) {
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('type', 'design');
+                    await fetch('/api/upload', { method: 'POST', body: formData });
+                }
+                hideLoader();
+                alert(files.length + " tasarım başarıyla eklendi! Artık üretime geçebilirsiniz.");
+                e.target.value = ''; // Inputu sıfırla
+            }
+        });
+
+        // Arkaplan Yükleme
+        document.getElementById('upload-bg').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('type', 'background');
+                
+                showLoader("Yükleniyor...");
+                await fetch('/api/upload', { method: 'POST', body: formData });
+                await loadBackgrounds();
+                hideLoader();
+            }
+        });
+
+        // Yapay Zeka Arkaplan Temizleme
+        document.getElementById('upload-rembg').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                showLoader("Yapay Zeka Arkaplanı Temizliyor...\n(İlk seferde AI modeli indireceği için uzun sürebilir)");
+                const res = await fetch('/api/remove-bg', { method: 'POST', body: formData });
+                const data = await res.json();
+                hideLoader();
+                
+                if (data.status === "success") {
+                    alert(data.filename + " olarak kaydedildi! Önizleme tasarımında seçebilirsiniz.");
+                } else {
+                    alert("Hata: " + data.error);
+                }
+            }
+        });
+
+        // Ayarları Kaydet
+        document.getElementById('btn-save').addEventListener('click', async () => {
+            if (!currentBgFile) return alert("Önce bir şablon seçin!");
+            
+            const scaleX = imgNaturalWidth / tshirtImg.width;
+            const scaleY = imgNaturalHeight / tshirtImg.height;
+
+            const realPoints = points.map(p => [Math.round(p.x * scaleX), Math.round(p.y * scaleY)]);
+            const realMaskPoints = maskPoints.map(p => [Math.round(p.x * scaleX), Math.round(p.y * scaleY)]);
+
+            const payload = {
+                [currentBgFile]: {
+                    "points": realPoints,
+                    "canvas_width": designW,
+                    "canvas_height": designH
+                }
+            };
+            if (realMaskPoints.length >= 3) {
+                payload[currentBgFile]["mask_points"] = realMaskPoints;
+            }
+
+            showLoader("Kaydediliyor...");
+            await fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            await loadConfig();
+            hideLoader();
+            alert("Ayarlar başarıyla kaydedildi!");
+        });
+
+        // Üretimi Başlat
+        document.getElementById('btn-generate').addEventListener('click', async () => {
+            showLoader("Mockuplar Üretiliyor...");
+            const res = await fetch('/api/generate', { method: 'POST' });
+            const data = await res.json();
+            hideLoader();
+            if(data.status === "success") {
+                alert("Üretim tamamlandı! Output klasörünü kontrol edin.\n\n" + data.output);
+            } else {
+                alert("Hata: " + data.message);
+            }
+        });
+
+        // --- Sürükle Bırak ve Çizim Mantığı ---
+        const btnDrawMask = document.getElementById('btn-draw-mask');
+        btnDrawMask.addEventListener('click', () => {
+            isDrawingMask = !isDrawingMask;
+            if (isDrawingMask) {
+                btnDrawMask.classList.add('active');
+                btnDrawMask.innerText = "Maske Çiziliyor... (Bitir)";
+                workspace.style.cursor = 'crosshair';
+                polyVisible.style.pointerEvents = 'none'; 
+                handles.forEach(h => h.style.pointerEvents = 'none');
+                edges.forEach(e => e.style.pointerEvents = 'none');
+            } else {
+                btnDrawMask.classList.remove('active');
+                btnDrawMask.innerText = "Manuel Kırpma Çiz";
+                workspace.style.cursor = 'default';
+                polyVisible.style.pointerEvents = 'fill';
+                handles.forEach(h => h.style.pointerEvents = 'auto');
+                edges.forEach(e => e.style.pointerEvents = 'fill');
+            }
+        });
+
+        document.getElementById('btn-clear-mask').addEventListener('click', () => {
+            maskPoints = [];
+            updateUI();
+        });
+
+        workspace.addEventListener('mousedown', (e) => {
+            if (isDrawingMask) {
+                const containerRect = workspace.getBoundingClientRect();
+                let nx = e.clientX - containerRect.left;
+                let ny = e.clientY - containerRect.top;
+                maskPoints.push({x: nx, y: ny});
+                updateUI();
+            }
+        });
+
+        handles.forEach((h, idx) => {
+            h.addEventListener('mousedown', (e) => {
+                if (isDrawingMask) return;
+                draggingType = 'point'; draggingIdx = idx; e.stopPropagation();
+            });
+        });
+
+        edges.forEach((edge, idx) => {
+            edge.addEventListener('mousedown', (e) => {
+                if (isDrawingMask) return;
+                draggingType = 'edge'; draggingIdx = idx; 
+                dragStartX = e.clientX; dragStartY = e.clientY;
+                originalPoints = points.map(p => ({...p})); e.stopPropagation();
+            });
+        });
+
+        polyVisible.addEventListener('mousedown', (e) => {
+            if (isDrawingMask) return;
+            draggingType = 'poly';
+            dragStartX = e.clientX; dragStartY = e.clientY;
+            originalPoints = points.map(p => ({...p})); e.stopPropagation();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!draggingType) return;
+            const containerRect = workspace.getBoundingClientRect();
+            let nx = e.clientX - containerRect.left; let ny = e.clientY - containerRect.top;
+            
+            if (draggingType === 'point') {
+                points[draggingIdx].x = nx; points[draggingIdx].y = ny;
+            } else {
+                const dx = e.clientX - dragStartX; const dy = e.clientY - dragStartY;
+                let indices = draggingType === 'poly' ? [0,1,2,3] : 
+                    [[0,1], [1,2], [2,3], [3,0]][draggingIdx];
+                indices.forEach(i => {
+                    points[i].x = originalPoints[i].x + dx;
+                    points[i].y = originalPoints[i].y + dy;
+                });
+            }
+            updateUI();
+        });
+
+        document.addEventListener('mouseup', () => { draggingType = null; });
+
+        function solveLinearSystem(A, b) {
+            var n = A.length;
+            for (var i = 0; i < n; i++) A[i].push(b[i]);
+            for (var i = 0; i < n; i++) {
+                var maxEl = Math.abs(A[i][i]), maxRow = i;
+                for (var k = i + 1; k < n; k++) if (Math.abs(A[k][i]) > maxEl) { maxEl = Math.abs(A[k][i]); maxRow = k; }
+                for (var k = i; k < n + 1; k++) { var tmp = A[maxRow][k]; A[maxRow][k] = A[i][k]; A[i][k] = tmp; }
+                for (var k = i + 1; k < n; k++) {
+                    var c = -A[k][i] / A[i][i];
+                    for (var j = i; j < n + 1; j++) { if (i === j) A[k][j] = 0; else A[k][j] += c * A[i][j]; }
+                }
+            }
+            var x = new Array(n);
+            for (var i = n - 1; i >= 0; i--) {
+                x[i] = A[i][n] / A[i][i];
+                for (var k = i - 1; k >= 0; k--) A[k][n] -= A[k][i] * x[i];
+            }
+            return x;
+        }
+
+        function updateUI() {
+            handles.forEach((h, idx) => {
+                h.style.left = points[idx].x + 'px'; h.style.top = points[idx].y + 'px';
+            });
+
+            const ptsString = points.map(p => `${p.x},${p.y}`).join(' ');
+            polyVisible.setAttribute('points', ptsString);
+            
+            if (maskPoints.length > 0) {
+                const maskString = maskPoints.map(p => `${p.x},${p.y}`).join(' ');
+                polyMask.setAttribute('points', maskString);
+                polyClip.setAttribute('points', maskPoints.length >= 3 ? maskString : `-1000,-1000 10000,-1000 10000,10000 -1000,10000`);
+            } else {
+                polyMask.setAttribute('points', "");
+                polyClip.setAttribute('points', `-1000,-1000 10000,-1000 10000,10000 -1000,10000`); 
+            }
+
+            maskPointsGroup.innerHTML = '';
+            maskPoints.forEach(p => {
+                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 5);
+                c.setAttribute('class', 'mask-point'); maskPointsGroup.appendChild(c);
+            });
+
+            edges[0].setAttribute('x1', points[0].x); edges[0].setAttribute('y1', points[0].y); edges[0].setAttribute('x2', points[1].x); edges[0].setAttribute('y2', points[1].y);
+            edges[1].setAttribute('x1', points[1].x); edges[1].setAttribute('y1', points[1].y); edges[1].setAttribute('x2', points[2].x); edges[1].setAttribute('y2', points[2].y);
+            edges[2].setAttribute('x1', points[2].x); edges[2].setAttribute('y1', points[2].y); edges[2].setAttribute('x2', points[3].x); edges[2].setAttribute('y2', points[3].y);
+            edges[3].setAttribute('x1', points[3].x); edges[3].setAttribute('y1', points[3].y); edges[3].setAttribute('x2', points[0].x); edges[3].setAttribute('y2', points[0].y);
+
+            if (designImg.src && designImg.style.display !== 'none' && designW > 0) {
+                var src = [{x: 0, y: 0}, {x: designW, y: 0}, {x: designW, y: designH}, {x: 0, y: designH}];
+                var dst = points;
+                var a = [], b = [];
+                for (var i = 0; i < 4; i++) {
+                    a.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x]); b.push(dst[i].x);
+                    a.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y]); b.push(dst[i].y);
+                }
+                var x = solveLinearSystem(a, b);
+                var t = [x[0], x[3], 0, x[6], x[1], x[4], 0, x[7], 0, 0, 1, 0, x[2], x[5], 0, 1];
+                designImg.style.transform = `matrix3d(${t.join(',')})`;
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
