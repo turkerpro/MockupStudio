@@ -4,3 +4,7 @@ output/
 .env
 venv/
 env/
+
+# Ignore all designs except canvas.png
+tasarim/*
+!tasarim/canvas.png
