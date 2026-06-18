@@ -144,6 +144,10 @@ def deduct_credits(user_id, amount, action):
 # --- Pages ---
 @app.route('/')
 def index():
+    return render_template('landing.html')
+
+@app.route('/studio')
+def studio():
     return render_template('index.html')
 
 @app.route('/admin')
