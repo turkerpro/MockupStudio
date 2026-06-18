@@ -319,6 +319,25 @@ def upload_file():
     file.save(os.path.join(folder, filename))
     return jsonify({'status': 'success', 'filename': filename})
 
+@app.route('/api/delete', methods=['POST'])
+def delete_file():
+    data = request.json
+    filename = secure_filename(data.get('filename', ''))
+    file_type = data.get('type', '')
+    if not filename:
+        return jsonify({'error': 'No filename'}), 400
+    if file_type == 'background':
+        path = os.path.join(app.config['BACKGROUNDS_FOLDER'], filename)
+    elif file_type == 'design':
+        path = os.path.join(app.config['TASARIM_FOLDER'], filename)
+    else:
+        return jsonify({'error': 'Invalid type'}), 400
+    if not os.path.exists(path):
+        return jsonify({'error': 'File not found'}), 404
+    os.remove(path)
+    return jsonify({'status': 'success'})
+
+
 @app.route('/api/site-config', methods=['GET'])
 def get_site_config():
     cfg = load_json(app.config['SITE_CONFIG_FILE'])

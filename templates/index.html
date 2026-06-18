@@ -174,6 +174,14 @@
             background: rgba(255,255,255,0.05); flex-shrink: 0;
         }
         .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .file-item .del-btn {
+            width: 22px; height: 22px; border-radius: 4px; border: none; background: transparent;
+            color: var(--text-muted); cursor: pointer; display: none; align-items: center;
+            justify-content: center; font-size: 13px; flex-shrink: 0; transition: all 0.15s;
+            padding: 0;
+        }
+        .file-item:hover .del-btn { display: flex; }
+        .file-item .del-btn:hover { background: rgba(239,68,68,0.15); color: var(--danger); }
 
         /* EDITOR WORKSPACE */
         .editor-layout { display: flex; height: 100%; }
@@ -465,6 +473,7 @@
             <!-- DESIGNS -->
             <div class="card">
                 <div class="card-title">Designs (Bulk Upload)</div>
+                <div class="file-list" id="design-list" style="margin-bottom:10px;"></div>
                 <div class="upload-area">
                     <input type="file" id="upload-designs-bulk" accept="image/*" multiple>
                     <div class="upload-area-icon">🎨</div>
@@ -799,16 +808,59 @@ async function loadDashboard() {
 }
 
 // ─── EDITOR ──────────────────────────────────────────────
+async function deleteFile(type, filename, e) {
+    e.stopPropagation();
+    if (!confirm(`Delete "${filename}"?`)) return;
+    const res = await fetch('/api/delete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({type, filename})
+    });
+    const data = await res.json();
+    if (data.status === 'success') {
+        showToast(`"${filename}" deleted`);
+        if (type === 'background') { loadBackgrounds(); if (currentBgFile === filename) { currentBgFile = null; workspace.style.display = 'none'; document.getElementById('workspace-placeholder').style.display = 'flex'; } }
+        else loadDesigns();
+    } else {
+        showToast(data.error || 'Delete failed', 'error');
+    }
+}
+
 async function loadBackgrounds() {
     const res = await fetch('/api/backgrounds');
     const files = await res.json();
     const list = document.getElementById('bg-list');
     list.innerHTML = '';
+    if (!files.length) { list.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text-muted)">No templates yet</div>'; return; }
     files.forEach(file => {
         const item = document.createElement('div');
         item.className = 'file-item';
-        item.innerHTML = `<img class="file-thumb" src="/backgrounds/${encodeURIComponent(file)}" onerror="this.style.display='none'"><span class="file-name">${file}</span>`;
-        item.onclick = () => { document.querySelectorAll('.file-item').forEach(x=>x.classList.remove('selected')); item.classList.add('selected'); selectBackground(file); };
+        if (file === currentBgFile) item.classList.add('selected');
+        item.innerHTML = `<img class="file-thumb" src="/backgrounds/${encodeURIComponent(file)}" onerror="this.style.display='none'"><span class="file-name" title="${file}">${file}</span><button class="del-btn" title="Delete">🗑</button>`;
+        item.querySelector('.file-name').onclick = () => { document.querySelectorAll('#bg-list .file-item').forEach(x=>x.classList.remove('selected')); item.classList.add('selected'); selectBackground(file); };
+        item.querySelector('.del-btn').onclick = (e) => deleteFile('background', file, e);
+        list.appendChild(item);
+    });
+}
+
+async function loadDesigns() {
+    const res = await fetch('/api/designs');
+    const files = await res.json();
+    const list = document.getElementById('design-list');
+    list.innerHTML = '';
+    if (!files.length) { list.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text-muted)">No designs yet. Upload above.</div>'; return; }
+    files.forEach(file => {
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `<img class="file-thumb" src="/tasarim/${encodeURIComponent(file)}" onerror="this.style.display='none'"><span class="file-name" title="${file}">${file}</span><button class="del-btn" title="Delete">🗑</button>`;
+        item.querySelector('.del-btn').onclick = (e) => deleteFile('design', file, e);
+        // Click to set as preview
+        item.querySelector('.file-name').onclick = () => {
+            const url = `/tasarim/${encodeURIComponent(file)}`;
+            designImg.onload = () => { designW = designImg.naturalWidth; designH = designImg.naturalHeight; designImg.style.display = 'block'; designImg.style.width = designW + 'px'; designImg.style.height = designH + 'px'; updateUI(); };
+            designImg.src = url;
+            showToast(`Preview: ${file}`);
+        };
         list.appendChild(item);
     });
 }
@@ -1069,6 +1121,7 @@ async function init() {
     await loadMe();
     await loadConfig();
     await loadBackgrounds();
+    await loadDesigns();
     loadDashboard();
 }
 init();
