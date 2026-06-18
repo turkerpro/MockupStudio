@@ -249,34 +249,34 @@ def handle_config():
     return jsonify({'status': 'success'})
 
 @app.route('/api/generate', methods=['POST'])
-@login_required
 def generate_mockups():
     u = current_user()
     site_cfg = load_json(app.config['SITE_CONFIG_FILE'])
     costs = site_cfg.get('credit_costs', {})
     
-    # Design count to determine bulk cost
     design_count = len([f for f in os.listdir(app.config['TASARIM_FOLDER']) if f.lower().endswith('.png')])
     bg_count = len([f for f in os.listdir(app.config['BACKGROUNDS_FOLDER']) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
     total = design_count * bg_count
     
-    cost = costs.get('generate_bulk', 5) if total >= 10 else costs.get('generate_single', 1) * total
-    cost = max(1, cost)
-    
-    ok, msg = deduct_credits(u['id'], cost, 'generate')
-    if not ok:
-        return jsonify({'status': 'error', 'message': f'Not enough credits! Need {cost}, have {u["credits"]}. Please top up.'}), 402
+    # Only deduct credits if user is logged in
+    cost = 0
+    if u:
+        cost = costs.get('generate_bulk', 5) if total >= 10 else costs.get('generate_single', 1) * total
+        cost = max(1, cost)
+        ok, msg = deduct_credits(u['id'], cost, 'generate')
+        if not ok:
+            return jsonify({'status': 'error', 'message': f'Not enough credits! Need {cost}, have {u["credits"]}. Please top up.'}), 402
     
     try:
         result = subprocess.run(['python', 'generate.py'], capture_output=True, text=True, timeout=300)
-        # Update total generated count
-        u_fresh = find_user_by_id(u['id'])
-        update_user(u['id'], {'total_generated': u_fresh.get('total_generated', 0) + total})
+        if u:
+            u_fresh = find_user_by_id(u['id'])
+            update_user(u['id'], {'total_generated': u_fresh.get('total_generated', 0) + total})
         return jsonify({'status': 'success', 'output': result.stdout, 'cost': cost, 'total': total})
     except Exception as e:
-        # Refund credits on error
-        u_fresh = find_user_by_id(u['id'])
-        update_user(u['id'], {'credits': u_fresh['credits'] + cost})
+        if u:
+            u_fresh = find_user_by_id(u['id'])
+            update_user(u['id'], {'credits': u_fresh['credits'] + cost})
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/remove-bg', methods=['POST'])
@@ -307,7 +307,6 @@ def remove_bg():
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/upload', methods=['POST'])
-@login_required
 def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': 'No file'}), 400

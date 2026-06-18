@@ -697,11 +697,26 @@ async function loadMe() {
     const data = await res.json();
     currentUser = data.user;
     updateUserUI();
-    if (!currentUser) showAuthModal();
+    // Auth is optional — guests can use the tool freely
 }
 function updateUserUI() {
-    if (!currentUser) return;
     const av = document.getElementById('user-avatar-btn');
+    if (!currentUser) {
+        av.textContent = '?';
+        document.getElementById('credit-count').textContent = '∞';
+        document.getElementById('dd-name').textContent = 'Guest';
+        document.getElementById('dd-email').textContent = 'Not signed in';
+        document.getElementById('stat-credits').textContent = '∞';
+        document.getElementById('stat-plan').textContent = 'GUEST';
+        document.getElementById('stat-plan').className = 'badge badge-warning';
+        document.getElementById('stat-generated').textContent = '—';
+        document.getElementById('welcome-msg').textContent = 'Welcome to Mockup Studio! 👋';
+        document.getElementById('admin-link').style.display = 'none';
+        document.getElementById('logout-btn').textContent = '→ Sign In';
+        document.getElementById('logout-btn').onclick = showAuthModal;
+        document.getElementById('logout-btn').className = 'user-dropdown-item';
+        return;
+    }
     av.textContent = currentUser.name[0].toUpperCase();
     document.getElementById('credit-count').textContent = currentUser.credits;
     document.getElementById('dd-name').textContent = currentUser.name;
@@ -712,6 +727,8 @@ function updateUserUI() {
     document.getElementById('stat-generated').textContent = currentUser.total_generated || 0;
     document.getElementById('welcome-msg').textContent = `Welcome back, ${currentUser.name}! 👋`;
     if (currentUser.is_admin) document.getElementById('admin-link').style.display = 'flex';
+    document.getElementById('logout-btn').textContent = '↩ Sign Out';
+    document.getElementById('logout-btn').onclick = doLogout;
     const warn = document.getElementById('credit-warning');
     warn.classList.toggle('show', currentUser.credits < 10);
 }
@@ -922,20 +939,17 @@ document.getElementById('btn-save').addEventListener('click', async () => {
 
 // Generate
 async function doGenerate() {
-    if (!currentUser){ showToast('Please sign in first', 'warning'); return; }
     showLoader('Generating mockups... This may take a moment ⚡');
     const res=await fetch('/api/generate',{method:'POST'});
     const data=await res.json();
     hideLoader();
     if(data.status==='success'){
-        currentUser.credits -= (data.cost||0);
-        updateUserUI();
-        showToast(`Done! ${data.total||0} mockups created using ${data.cost||0} credits 🎉`);
+        if (currentUser) { currentUser.credits -= (data.cost||0); updateUserUI(); }
+        showToast(`Done! ${data.total||0} mockups created! 🎉`);
         loadDashboard();
-        // Show result ad for free users
-        if(currentUser.plan==='free') {
+        if (!currentUser || currentUser.plan==='free') {
             const adHtml = siteConfig.sponsor_banner_html || '';
-            if(adHtml) showToast('Sponsored: ' + adHtml.replace(/<[^>]+>/g,''), 'warning', 8000);
+            if(adHtml) document.getElementById('dashboard-ad').innerHTML = adHtml;
         }
     } else {
         showToast(data.message||'Generation failed', 'error');
