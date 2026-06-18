@@ -9,27 +9,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #12121a;
-            --bg-card: rgba(255,255,255,0.04);
-            --bg-card-hover: rgba(255,255,255,0.07);
-            --border: rgba(255,255,255,0.08);
-            --border-active: rgba(124,58,237,0.5);
-            --purple: #7c3aed;
-            --purple-light: #a78bfa;
-            --purple-dark: #5b21b6;
-            --teal: #06d6a0;
-            --teal-dark: #059669;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #475569;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-            --radius: 12px;
+            --bg-primary: #000000;
+            --bg-secondary: #1c1c1e;
+            --bg-card: #1c1c1e;
+            --bg-card-hover: #2c2c2e;
+            --border: rgba(255,255,255,0.1);
+            --border-active: rgba(10,132,255,0.5);
+            --purple: #0a84ff; /* Apple Blue */
+            --purple-light: #5e5ce6; /* Apple Indigo */
+            --purple-dark: #005bb5;
+            --teal: #30d158; /* Apple Green */
+            --teal-dark: #24a145;
+            --text-primary: #ffffff;
+            --text-secondary: #ebebf599; /* secondary label */
+            --text-muted: #ebebf566; /* tertiary label */
+            --danger: #ff453a; /* Apple Red */
+            --warning: #ff9f0a; /* Apple Orange */
+            --success: #30d158;
+            --radius: 14px;
             --radius-sm: 8px;
-            --shadow: 0 4px 24px rgba(0,0,0,0.4);
-            --shadow-purple: 0 4px 24px rgba(124,58,237,0.3);
+            --shadow: 0 4px 24px rgba(0,0,0,0.5);
+            --shadow-purple: 0 4px 24px rgba(10,132,255,0.3);
             --sidebar-w: 280px;
             --navbar-h: 64px;
         }
@@ -37,7 +37,8 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { font-size: 14px; }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
@@ -52,8 +53,8 @@
         /* NAVBAR */
         .navbar {
             position: fixed; top: 0; left: 0; right: 0; height: var(--navbar-h);
-            background: rgba(10,10,15,0.9); backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
+            background: rgba(28, 28, 30, 0.75); backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid var(--border);
             display: flex; align-items: center; padding: 0 24px; gap: 8px;
             z-index: 1000;
         }
@@ -74,7 +75,7 @@
             border: none; background: transparent; font-size: 13px; font-family: inherit;
         }
         .nav-tab:hover { color: var(--text-primary); background: var(--bg-card-hover); }
-        .nav-tab.active { color: var(--purple-light); background: rgba(124,58,237,0.15); }
+        .nav-tab.active { color: var(--text-primary); background: rgba(255,255,255,0.1); font-weight: 600; }
         .navbar-right { display: flex; align-items: center; gap: 12px; }
         .credit-badge {
             display: flex; align-items: center; gap: 6px;
@@ -125,22 +126,18 @@
         /* BUTTONS */
         .btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13px;
-            font-weight: 600; cursor: pointer; border: none; font-family: inherit;
+            padding: 10px 16px; border-radius: var(--radius-sm); font-size: 14px;
+            font-weight: 500; cursor: pointer; border: none; font-family: inherit;
             transition: all 0.2s; text-decoration: none; width: 100%;
         }
         .btn-primary {
-            background: linear-gradient(135deg, var(--purple), #6d28d9);
-            color: white; box-shadow: var(--shadow-purple);
+            background: var(--purple); color: white;
         }
-        .btn-primary:hover { background: linear-gradient(135deg, #8b5cf6, var(--purple)); transform: translateY(-1px); }
-        .btn-success {
-            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
-            color: white;
-        }
-        .btn-success:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-primary:hover { background: #0071e3; transform: scale(0.98); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #28b84d; transform: scale(0.98); }
         .btn-ghost {
-            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary);
+            background: rgba(255,255,255,0.1); color: var(--text-primary);
         }
         .btn-ghost:hover { background: var(--bg-card-hover); color: var(--text-primary); }
         .btn-danger { background: var(--danger); color: white; }
@@ -281,15 +278,15 @@
 
         /* MODAL */
         .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px);
             z-index: 9000; display: none; align-items: center; justify-content: center;
         }
         .modal-overlay.open { display: flex; }
         .modal {
-            background: var(--bg-secondary); border: 1px solid var(--border);
-            border-radius: 16px; padding: 32px; width: 100%; max-width: 440px;
+            background: rgba(28, 28, 30, 0.85); backdrop-filter: saturate(180%) blur(40px); border: 0.5px solid var(--border);
+            border-radius: 18px; padding: 32px; width: 100%; max-width: 440px;
             box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-            animation: modalIn 0.25s ease;
+            animation: modalIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         @keyframes modalIn { from { transform: scale(0.95) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
         .modal h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
