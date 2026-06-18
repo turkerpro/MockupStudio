@@ -9,12 +9,30 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* LIGHT MODE (Apple HIG) */
+            --bg: #f5f5f7; --bg2: #ffffff;
+            --purple: #007aff; --purple-light: #5e5ce6; --purple-dark: #0056b3;
+            --teal: #34c759; --teal-dark: #24a145;
+            --text: #000000; --text2: rgba(0,0,0,0.55); --text3: rgba(0,0,0,0.4);
+            --border: rgba(0,0,0,0.1);
+            --radius: 18px; --radius-sm: 8px;
+            --nav-bg: rgba(255,255,255,0.75);
+            --shadow: 0 40px 100px rgba(0,0,0,0.1);
+            --btn-ghost: rgba(0,0,0,0.05);
+            --btn-ghost-hover: rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            /* DARK MODE (Apple HIG) */
+            --bg: #000000; --bg2: #1c1c1e;
             --purple: #0a84ff; --purple-light: #5e5ce6; --purple-dark: #005bb5;
             --teal: #30d158; --teal-dark: #24a145;
-            --bg: #000000; --bg2: #1c1c1e;
-            --text: #ffffff; --text2: #ebebf599; --text3: #ebebf566;
+            --text: #ffffff; --text2: rgba(255,255,255,0.6); --text3: rgba(255,255,255,0.4);
             --border: rgba(255,255,255,0.15);
-            --radius: 18px; --radius-sm: 8px;
+            --nav-bg: rgba(28,28,30,0.75);
+            --shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+            --btn-ghost: rgba(255,255,255,0.1);
+            --btn-ghost-hover: rgba(255,255,255,0.15);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
@@ -36,12 +54,11 @@
         .orb-1 { width: 600px; height: 600px; background: var(--purple); top: -200px; left: -100px; }
         .orb-2 { width: 500px; height: 500px; background: var(--teal); bottom: -200px; right: -100px; }
 
-        /* NAV */
         nav {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
             padding: 0 40px; height: 64px;
             display: flex; align-items: center; justify-content: space-between;
-            background: rgba(28, 28, 30, 0.75); backdrop-filter: saturate(180%) blur(20px);
+            background: var(--nav-bg); backdrop-filter: saturate(180%) blur(20px);
             border-bottom: 0.5px solid var(--border);
         }
         .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; text-decoration: none; color: var(--text); }
@@ -89,11 +106,11 @@
         }
         .btn-hero-primary:hover { transform: scale(0.98); background: #0071e3; }
         .btn-hero-secondary {
-            background: rgba(255,255,255,0.1); border: 0.5px solid var(--border);
+            background: var(--btn-ghost); border: 0.5px solid var(--border);
             color: var(--text); padding: 14px 28px; border-radius: var(--radius-sm); font-size: 16px;
             font-weight: 500; text-decoration: none; transition: all 0.2s;
         }
-        .btn-hero-secondary:hover { background: rgba(255,255,255,0.15); transform: scale(0.98); }
+        .btn-hero-secondary:hover { background: var(--btn-ghost-hover); transform: scale(0.98); }
         .hero-sub { margin-top: 20px; font-size: 13px; color: var(--text3); animation: fadeUp 0.6s ease 0.4s both; }
 
         /* HERO MOCKUP PREVIEW */
@@ -103,7 +120,7 @@
         }
         .preview-window {
             background: var(--bg2); border: 1px solid var(--border); border-radius: 20px;
-            overflow: hidden; box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+            overflow: hidden; box-shadow: var(--shadow);
         }
         .preview-bar {
             background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border);
@@ -233,7 +250,8 @@
             Mockup Studio
         </a>
         <div class="nav-links">
-            <a href="#features" class="nav-link">Features</a>
+        <button id="theme-toggle" onclick="toggleTheme()" style="background:none; border:none; padding:6px; cursor:pointer; font-size:18px; margin-right:12px;">🌙</button>
+        <a href="#features" class="nav-link">Features</a>
             <a href="#how-it-works" class="nav-link">How it works</a>
             <a href="#pricing" class="nav-link">Pricing</a>
         </div>
@@ -449,5 +467,21 @@
         </div>
         <div class="copy">© 2024 Mockup Studio. Built with ❤️</div>
     </footer>
+<script>
+    const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    window.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('theme-toggle');
+        if(btn) btn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    });
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        const btn = document.getElementById('theme-toggle');
+        if(btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+    }
+</script>
 </body>
 </html>
