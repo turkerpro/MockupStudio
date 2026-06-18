@@ -138,14 +138,11 @@
 
         /* CARDS / PANELS */
         .card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 16px;
-            transition: all 0.2s;
+            background: transparent; margin-bottom: 24px;
         }
-        .card:hover { border-color: rgba(255,255,255,0.12); }
         .card-title {
             font-size: 11px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 12px;
+            letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 8px; padding-left: 8px;
         }
 
         /* BUTTONS */
@@ -172,78 +169,87 @@
 
         /* FILE UPLOAD */
         .upload-area {
-            border: 1.5px dashed rgba(255,255,255,0.15); border-radius: var(--radius-sm);
-            padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;
-            background: transparent; position: relative; overflow: hidden;
+            background: var(--bg-card); border: 0.5px solid var(--border); border-radius: var(--radius-sm);
+            padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s;
+            position: relative; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .upload-area:hover { border-color: var(--purple); background: rgba(124,58,237,0.05); }
-        .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
-        .upload-area-icon { font-size: 22px; margin-bottom: 6px; }
+        .upload-area:hover { border-color: rgba(10,132,255,0.4); background: var(--bg-card-hover); }
+        .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+        .upload-area-icon { font-size: 20px; margin-bottom: 4px; }
         .upload-area p { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
-        .upload-area span { color: var(--purple-light); font-weight: 500; }
+        .upload-area span { color: var(--purple); font-weight: 500; }
 
         /* FILE LIST */
-        .file-list { display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; }
+        .file-list { display: flex; flex-direction: column; gap: 2px; max-height: 180px; overflow-y: auto; padding: 0 4px; }
         .file-item {
-            display: flex; align-items: center; gap: 8px; padding: 8px 10px;
-            border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s;
-            border: 1px solid transparent; font-size: 12px; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 8px; padding: 6px 8px;
+            border-radius: 6px; cursor: pointer; transition: background 0.1s;
+            border: none; font-size: 12px; color: var(--text-primary);
         }
-        .file-item:hover { background: var(--bg-card-hover); color: var(--text-primary); }
-        .file-item.selected { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.4); color: var(--purple-light); }
+        .file-item:hover { background: rgba(120,120,120,0.1); }
+        .file-item.selected { background: var(--purple); color: white; }
         .file-item .file-thumb {
-            width: 28px; height: 28px; border-radius: 4px; object-fit: cover;
-            background: rgba(255,255,255,0.05); flex-shrink: 0;
+            width: 24px; height: 24px; border-radius: 4px; object-fit: cover;
+            background: rgba(255,255,255,0.05); flex-shrink: 0; border: 0.5px solid rgba(0,0,0,0.1);
         }
-        .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
         .file-item .del-btn {
-            width: 22px; height: 22px; border-radius: 4px; border: none; background: transparent;
-            color: var(--text-muted); cursor: pointer; display: none; align-items: center;
-            justify-content: center; font-size: 13px; flex-shrink: 0; transition: all 0.15s;
-            padding: 0;
+            width: 20px; height: 20px; border-radius: 4px; border: none; background: transparent;
+            color: inherit; opacity: 0.5; cursor: pointer; display: none; align-items: center;
+            justify-content: center; font-size: 12px; flex-shrink: 0;
         }
         .file-item:hover .del-btn { display: flex; }
-        .file-item .del-btn:hover { background: rgba(239,68,68,0.15); color: var(--danger); }
+        .file-item .del-btn:hover { opacity: 1; background: rgba(0,0,0,0.2); }
+        .file-item.selected .del-btn:hover { background: rgba(255,255,255,0.2); }
 
         /* EDITOR WORKSPACE */
         .editor-layout { display: flex; height: 100%; }
-        .editor-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; overflow: hidden; }
+        .editor-main {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; overflow: hidden;
+            background-color: var(--bg-primary);
+            background-image: radial-gradient(var(--border) 1px, transparent 0);
+            background-size: 24px 24px;
+        }
         .workspace-container {
             position: relative; display: inline-block; user-select: none;
-            border-radius: var(--radius); overflow: visible;
-            box-shadow: 0 0 0 1px var(--border), var(--shadow);
+            border-radius: 12px; overflow: visible;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 0 0.5px rgba(0,0,0,0.1);
             max-width: 100%; max-height: calc(100vh - var(--navbar-h) - 80px);
         }
-        #tshirt-img { display: block; max-width: 100%; max-height: calc(100vh - var(--navbar-h) - 80px); border-radius: var(--radius); pointer-events: none; }
+        #tshirt-img { display: block; max-width: 100%; max-height: calc(100vh - var(--navbar-h) - 80px); border-radius: 12px; pointer-events: none; }
         #clip-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; clip-path: url(#my-clip); }
         #design-img { position: absolute; top: 0; left: 0; transform-origin: 0 0; opacity: 0.9; pointer-events: none; display: none; }
         #svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; overflow: visible; display: none; }
-        #poly-visible { fill: rgba(124,58,237,0.08); stroke: var(--purple-light); stroke-width: 2; stroke-dasharray: 5,3; cursor: move; pointer-events: fill; }
-        #poly-mask { fill: rgba(239,68,68,0.12); stroke: var(--danger); stroke-width: 2; pointer-events: none; }
+        #poly-visible { fill: rgba(10,132,255,0.08); stroke: var(--purple); stroke-width: 1.5; stroke-dasharray: 4,4; cursor: move; pointer-events: fill; }
+        #poly-mask { fill: rgba(255,59,48,0.1); stroke: var(--danger); stroke-width: 1.5; pointer-events: none; }
         .mask-point { fill: var(--danger); pointer-events: fill; cursor: pointer; }
         .edge-line { stroke: transparent; stroke-width: 16; pointer-events: fill; }
         .handle {
-            position: absolute; width: 18px; height: 18px;
-            background: var(--purple); border: 2.5px solid white;
+            position: absolute; width: 14px; height: 14px;
+            background: #ffffff; border: 1.5px solid rgba(0,0,0,0.2);
             border-radius: 50%; transform: translate(-50%,-50%); cursor: grab;
-            z-index: 20; display: none; box-shadow: 0 2px 8px rgba(124,58,237,0.5);
-            transition: transform 0.1s, background 0.1s;
+            z-index: 20; display: none; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
         }
-        .handle:hover { transform: translate(-50%,-50%) scale(1.2); background: var(--purple-light); }
-        .handle:active { cursor: grabbing; }
+        .handle:hover { transform: translate(-50%,-50%) scale(1.2); }
+        .handle:active { cursor: grabbing; background: var(--purple); border-color: #ffffff; }
         .workspace-placeholder {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 16px; padding: 60px; color: var(--text-muted); text-align: center;
+            gap: 16px; padding: 60px; color: var(--text-secondary); text-align: center;
+            background: var(--bg-card); border-radius: 16px; border: 0.5px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 320px;
         }
-        .workspace-placeholder .big-icon { font-size: 64px; opacity: 0.3; }
-        .workspace-placeholder h3 { font-size: 18px; color: var(--text-secondary); }
-        .workspace-placeholder p { font-size: 13px; line-height: 1.6; }
+        .workspace-placeholder .big-icon { font-size: 48px; margin-bottom: 8px; }
+        .workspace-placeholder h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .workspace-placeholder p { font-size: 13px; line-height: 1.5; }
 
         /* DASHBOARD */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
         .stat-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 20px; transition: all 0.2s;
+            background: var(--bg-card); border: 0.5px solid var(--border);
+            border-radius: 12px; padding: 20px; transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
         .stat-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
         .stat-card .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
