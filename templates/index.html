@@ -518,55 +518,53 @@
     <main class="main-area">
 
         <!-- DASHBOARD TAB -->
-        <div class="tab-content active scrollable-page" id="tab-dashboard">
-            <div class="section-header">
+        <div class="tab-content active scrollable-page" id="tab-dashboard" style="padding:16px 20px;">
+            <!-- HEADER ROW -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <div>
-                    <h2 id="welcome-msg">Welcome back! 👋</h2>
-                    <p style="color:var(--text-secondary);font-size:13px;margin-top:4px;">Here's your Mockup Studio overview</p>
+                    <div id="welcome-msg" style="font-size:15px;font-weight:700;">Welcome back! 👋</div>
+                    <div style="color:var(--text-secondary);font-size:12px;margin-top:2px;">Mockup Studio overview</div>
                 </div>
-                <button class="btn btn-primary" style="width:auto;" onclick="switchTab('editor')">🎨 Open Editor</button>
+                <button class="btn btn-primary btn-sm" style="width:auto;" onclick="switchTab('editor')">🎨 Editor</button>
             </div>
-            <div class="dashboard-grid" style="margin-bottom:28px;">
-                <div class="stat-card stat-purple">
-                    <div class="stat-label">Credits Remaining</div>
-                    <div class="stat-value" id="stat-credits">—</div>
-                    <div class="stat-sub">Current plan: <span id="stat-plan" class="badge badge-purple">—</span></div>
+
+            <!-- STAT CARDS -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Credits</div>
+                    <div style="font-size:22px;font-weight:800;color:var(--purple-light);" id="stat-credits">—</div>
+                    <div style="margin-top:3px;"><span id="stat-plan" class="badge badge-purple" style="font-size:10px;">—</span></div>
                 </div>
-                <div class="stat-card stat-teal">
-                    <div class="stat-label">Mockups Generated</div>
-                    <div class="stat-value" id="stat-generated">0</div>
-                    <div class="stat-sub">Total in your account</div>
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Generated</div>
+                    <div style="font-size:22px;font-weight:800;color:var(--teal);" id="stat-generated">0</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">total mockups</div>
                 </div>
-                <div class="stat-card stat-warning">
-                    <div class="stat-label">Output Files</div>
-                    <div class="stat-value" id="stat-output">0</div>
-                    <div class="stat-sub">Ready to download</div>
+                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
+                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Output Files</div>
+                    <div style="font-size:22px;font-weight:800;color:var(--warning);" id="stat-output">0</div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">ready to download</div>
                 </div>
             </div>
 
             <!-- QUICK ACTIONS -->
-            <div class="section-header" style="margin-top:8px;">
-                <h2 style="font-size:18px;">Quick Actions</h2>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:28px;">
-                <div class="card" style="cursor:pointer;text-align:center;padding:24px;" onclick="switchTab('editor')">
-                    <div style="font-size:32px;margin-bottom:10px;">🎨</div>
-                    <div style="font-weight:700;">Open Editor</div>
-                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Set up warp points & masks</div>
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;">Quick Actions</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
+                <div class="card" style="cursor:pointer;text-align:center;padding:14px 10px;" onclick="switchTab('editor')">
+                    <div style="font-size:20px;margin-bottom:5px;">🎨</div>
+                    <div style="font-weight:700;font-size:12px;">Editor</div>
                 </div>
-                <div class="card" style="cursor:pointer;text-align:center;padding:24px;" onclick="quickGenerate()">
-                    <div style="font-size:32px;margin-bottom:10px;">⚡</div>
-                    <div style="font-weight:700;">Generate All</div>
-                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Run production batch</div>
+                <div class="card" style="cursor:pointer;text-align:center;padding:14px 10px;" onclick="quickGenerate()">
+                    <div style="font-size:20px;margin-bottom:5px;">⚡</div>
+                    <div style="font-weight:700;font-size:12px;">Generate</div>
                 </div>
-                <div class="card" style="cursor:pointer;text-align:center;padding:24px;" onclick="switchTab('gallery')">
-                    <div style="font-size:32px;margin-bottom:10px;">🖼️</div>
-                    <div style="font-weight:700;">View Gallery</div>
-                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Browse & download results</div>
+                <div class="card" style="cursor:pointer;text-align:center;padding:14px 10px;" onclick="switchTab('gallery')">
+                    <div style="font-size:20px;margin-bottom:5px;">🖼️</div>
+                    <div style="font-weight:700;font-size:12px;">Gallery</div>
                 </div>
             </div>
 
-            <!-- AD (result slot - show on dashboard for free users) -->
+            <!-- AD -->
             <div class="ad-container" id="dashboard-ad"></div>
         </div>
 
@@ -647,6 +645,7 @@
 <script>
 // ─── STATE ───────────────────────────────────────────────
 let currentUser = null;
+let guestCredits = 20;
 let globalConfig = {};
 let siteConfig = {};
 let currentBgFile = null;
@@ -705,6 +704,7 @@ async function loadMe() {
     const res = await fetch('/api/auth/me');
     const data = await res.json();
     currentUser = data.user;
+    if (data.guest_credits !== undefined) guestCredits = data.guest_credits;
     updateUserUI();
     // Auth is optional — guests can use the tool freely
 }
@@ -712,10 +712,10 @@ function updateUserUI() {
     const av = document.getElementById('user-avatar-btn');
     if (!currentUser) {
         av.textContent = '?';
-        document.getElementById('credit-count').textContent = '∞';
+        document.getElementById('credit-count').textContent = guestCredits;
         document.getElementById('dd-name').textContent = 'Guest';
         document.getElementById('dd-email').textContent = 'Not signed in';
-        document.getElementById('stat-credits').textContent = '∞';
+        document.getElementById('stat-credits').textContent = guestCredits;
         document.getElementById('stat-plan').textContent = 'GUEST';
         document.getElementById('stat-plan').className = 'badge badge-warning';
         document.getElementById('stat-generated').textContent = '—';
@@ -996,7 +996,9 @@ async function doGenerate() {
     const data=await res.json();
     hideLoader();
     if(data.status==='success'){
-        if (currentUser) { currentUser.credits -= (data.cost||0); updateUserUI(); }
+        if (currentUser) { currentUser.credits -= (data.cost||0); }
+        else { guestCredits -= (data.cost||0); }
+        updateUserUI();
         showToast(`Done! ${data.total||0} mockups created! 🎉`);
         loadDashboard();
         if (!currentUser || currentUser.plan==='free') {

@@ -219,7 +219,9 @@ def logout():
 def me():
     u = current_user()
     if not u:
-        return jsonify({'user': None})
+        if 'guest_credits' not in session:
+            session['guest_credits'] = 20
+        return jsonify({'user': None, 'guest_credits': session['guest_credits']})
     return jsonify({'user': {k: v for k, v in u.items() if k != 'password'}})
 
 # --- Main APIs ---
@@ -262,14 +264,20 @@ def generate_mockups():
     bg_count = len([f for f in os.listdir(app.config['BACKGROUNDS_FOLDER']) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
     total = design_count * bg_count
     
-    # Only deduct credits if user is logged in
-    cost = 0
+    # Every mockup costs exactly 2 credits
+    cost = total * 2
+    
     if u:
-        cost = costs.get('generate_bulk', 5) if total >= 10 else costs.get('generate_single', 1) * total
-        cost = max(1, cost)
         ok, msg = deduct_credits(u['id'], cost, 'generate')
         if not ok:
             return jsonify({'status': 'error', 'message': f'Not enough credits! Need {cost}, have {u["credits"]}. Please top up.'}), 402
+    else:
+        if 'guest_credits' not in session:
+            session['guest_credits'] = 20
+        if session['guest_credits'] < cost:
+            return jsonify({'status': 'error', 'message': f'Not enough credits! Need {cost}, have {session["guest_credits"]}. Please sign up for more credits!'}), 402
+        session['guest_credits'] -= cost
+        session.modified = True
     
     try:
         result = subprocess.run(['python', 'generate.py'], capture_output=True, text=True, timeout=300)
@@ -281,6 +289,9 @@ def generate_mockups():
         if u:
             u_fresh = find_user_by_id(u['id'])
             update_user(u['id'], {'credits': u_fresh['credits'] + cost})
+        else:
+            session['guest_credits'] += cost
+            session.modified = True
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/api/remove-bg', methods=['POST'])
