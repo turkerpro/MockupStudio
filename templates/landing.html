@@ -51,22 +51,21 @@
             position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
             filter: blur(120px); opacity: 0.12;
         }
-        .orb-1 { width: 600px; height: 600px; background: var(--purple); top: -200px; left: -100px; }
-        .orb-2 { width: 500px; height: 500px; background: var(--teal); bottom: -200px; right: -100px; }
-
+        /* NAV */
         nav {
             position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            padding: 0 40px; height: 64px;
+            padding: 0 max(20px, env(safe-area-inset-right)); height: 48px;
             display: flex; align-items: center; justify-content: space-between;
             background: var(--nav-bg); backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 0.5px solid var(--border);
+            border-bottom: none; /* Apple.com nav often has no visible border or very subtle */
+            box-shadow: 0 1px 0 rgba(0,0,0,0.05);
         }
-        .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; text-decoration: none; color: var(--text); }
-        .nav-logo { width: 34px; height: 34px; background: var(--purple); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .nav-links { display: flex; align-items: center; gap: 4px; }
-        .nav-link { padding: 8px 16px; border-radius: 6px; font-size: 14px; color: var(--text2); text-decoration: none; transition: all 0.2s; font-weight: 500; }
-        .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.1); }
-        .nav-cta { background: var(--purple); color: white !important; padding: 8px 16px; border-radius: var(--radius-sm); font-weight: 500; font-size: 14px; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; font-family: inherit; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; text-decoration: none; color: var(--text); letter-spacing: -0.02em; }
+        .nav-logo { width: 24px; height: 24px; background: var(--text); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+        .nav-links { display: flex; align-items: center; gap: 24px; }
+        .nav-link { font-size: 12px; color: var(--text2); text-decoration: none; transition: all 0.2s; font-weight: 400; letter-spacing: -0.01em; }
+        .nav-link:hover { color: var(--text); }
+        .nav-cta { background: var(--purple); color: white !important; padding: 4px 12px; border-radius: 999px; font-weight: 400; font-size: 12px; text-decoration: none; transition: all 0.2s; border: none; cursor: pointer; font-family: inherit; }
         .nav-cta:hover { background: #0071e3; transform: scale(0.98); }
 
         /* HERO */
@@ -78,40 +77,37 @@
         }
         .hero-badge {
             display: inline-flex; align-items: center; gap: 8px;
-            background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
-            border-radius: 30px; padding: 6px 16px; font-size: 13px; font-weight: 600;
-            color: var(--purple-light); margin-bottom: 28px;
+            font-size: 14px; font-weight: 600;
+            color: var(--warning); margin-bottom: 12px;
+            letter-spacing: -0.02em;
             animation: fadeUp 0.6s ease;
         }
-        .hero-badge .dot { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
         .hero h1 {
-            font-size: clamp(42px, 7vw, 88px); font-weight: 800; line-height: 1.05;
-            letter-spacing: -0.04em; margin-bottom: 24px;
+            font-size: clamp(48px, 9vw, 96px); font-weight: 700; line-height: 1.05;
+            letter-spacing: -0.05em; margin-bottom: 20px;
             animation: fadeUp 0.6s ease 0.1s both;
-        }
-        .hero h1 .gradient {
-            color: var(--purple); background: none; -webkit-text-fill-color: var(--purple);
+            color: var(--text);
         }
         .hero p {
-            font-size: clamp(16px, 2.5vw, 20px); color: var(--text2); max-width: 600px;
-            line-height: 1.6; margin-bottom: 40px; font-weight: 400;
+            font-size: clamp(21px, 3.5vw, 28px); color: var(--text2); max-width: 700px;
+            line-height: 1.3; margin-bottom: 40px; font-weight: 500; letter-spacing: -0.02em;
             animation: fadeUp 0.6s ease 0.2s both;
         }
-        .hero-actions { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; justify-content: center; animation: fadeUp 0.6s ease 0.3s both; }
+        .hero-actions { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; justify-content: center; animation: fadeUp 0.6s ease 0.3s both; }
         .btn-hero-primary {
-            background: var(--purple);
-            color: white; padding: 14px 28px; border-radius: var(--radius-sm); font-size: 16px;
-            font-weight: 500; text-decoration: none; transition: all 0.2s;
+            background: var(--text); color: var(--bg);
+            padding: 18px 36px; border-radius: 999px; font-size: 17px;
+            font-weight: 600; text-decoration: none; transition: all 0.2s; letter-spacing: -0.02em;
         }
-        .btn-hero-primary:hover { transform: scale(0.98); background: #0071e3; }
+        .btn-hero-primary:hover { opacity: 0.9; transform: scale(0.98); }
         .btn-hero-secondary {
-            background: var(--btn-ghost); border: 0.5px solid var(--border);
-            color: var(--text); padding: 14px 28px; border-radius: var(--radius-sm); font-size: 16px;
-            font-weight: 500; text-decoration: none; transition: all 0.2s;
+            color: var(--purple); font-size: 17px; background: none; border: none;
+            font-weight: 500; text-decoration: none; transition: all 0.2s; letter-spacing: -0.02em;
+            display: flex; align-items: center; gap: 6px;
         }
-        .btn-hero-secondary:hover { background: var(--btn-ghost-hover); transform: scale(0.98); }
-        .hero-sub { margin-top: 20px; font-size: 13px; color: var(--text3); animation: fadeUp 0.6s ease 0.4s both; }
+        .btn-hero-secondary::after { content: '>'; font-size: 14px; font-weight: 600; }
+        .btn-hero-secondary:hover { color: #0071e3; text-decoration: underline; }
+        .hero-sub { margin-top: 20px; font-size: 14px; color: var(--text3); animation: fadeUp 0.6s ease 0.4s both; font-weight: 500; letter-spacing: -0.01em; }
 
         /* HERO MOCKUP PREVIEW */
         .hero-preview {
@@ -154,34 +150,49 @@
         /* STATS BAR */
         .stats-bar {
             position: relative; z-index: 1;
-            border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-            background: rgba(255,255,255,0.02); padding: 32px 40px;
-            display: flex; align-items: center; justify-content: center; gap: 80px;
+            padding: 60px 40px; background: var(--bg);
+            display: flex; align-items: center; justify-content: center; gap: 100px;
             flex-wrap: wrap;
         }
         .stat-item { text-align: center; }
-        .stat-item .val { font-size: 36px; font-weight: 900; background: linear-gradient(135deg, var(--purple-light), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .stat-item .lbl { font-size: 13px; color: var(--text3); margin-top: 4px; }
+        .stat-item .val { font-size: 48px; font-weight: 700; color: var(--text); letter-spacing: -0.04em; }
+        .stat-item .lbl { font-size: 17px; color: var(--text2); margin-top: 4px; font-weight: 500; letter-spacing: -0.02em; }
 
         /* SECTION */
-        section { position: relative; z-index: 1; }
-        .section-inner { max-width: 1100px; margin: 0 auto; padding: 100px 24px; }
-        .section-tag { display: inline-block; background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3); border-radius: 20px; padding: 4px 14px; font-size: 12px; font-weight: 600; color: var(--purple-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
-        .section-title { font-size: clamp(32px, 5vw, 52px); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 16px; }
-        .section-sub { font-size: 17px; color: var(--text2); line-height: 1.7; max-width: 560px; }
+        section { position: relative; z-index: 1; padding: 140px 24px; background: var(--bg); }
+        .section-inner { max-width: 1100px; margin: 0 auto; }
+        .section-tag { display: block; font-size: 19px; font-weight: 600; color: var(--purple); letter-spacing: -0.01em; margin-bottom: 8px; }
+        .section-title { font-size: clamp(40px, 6vw, 64px); font-weight: 700; line-height: 1.05; letter-spacing: -0.04em; margin-bottom: 24px; }
+        .section-sub { font-size: 21px; font-weight: 500; color: var(--text2); line-height: 1.4; max-width: 700px; letter-spacing: -0.02em; }
         .text-center { text-align: center; }
         .text-center .section-sub { margin: 0 auto; }
 
-        /* FEATURES */
-        .features { padding: 100px 24px; background: var(--bg2); }
-        .section-header { text-align: center; margin-bottom: 60px; }
-        .section-header h2 { font-size: 36px; font-weight: 700; margin-bottom: 16px; letter-spacing: -0.02em; }
-        .section-header p { color: var(--text2); font-size: 18px; max-width: 500px; margin: 0 auto; }
-        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
+        /* FEATURES - BENTO BOX */
+        .features { background: var(--bg2); }
+        .section-header { text-align: center; margin-bottom: 80px; }
+        .section-header h2 { font-size: clamp(40px, 6vw, 64px); font-weight: 700; margin-bottom: 16px; letter-spacing: -0.04em; }
+        .section-header p { color: var(--text2); font-size: 21px; max-width: 600px; margin: 0 auto; font-weight: 500; letter-spacing: -0.02em; line-height: 1.4; }
+        
+        .feature-grid { 
+            display: grid; grid-template-columns: repeat(3, 1fr); grid-auto-rows: 280px; 
+            gap: 24px; max-width: 1100px; margin: 0 auto; 
+        }
         .feature-card {
-        .feature-icon { font-size: 32px; margin-bottom: 16px; }
-        .feature-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; }
-        .feature-desc { font-size: 14px; color: var(--text2); line-height: 1.7; }
+            background: var(--bg); border-radius: 28px; padding: 40px; 
+            transition: all 0.3s; position: relative; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            box-shadow: var(--shadow);
+        }
+        /* Bento Box spans */
+        .feature-card:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+        .feature-card:nth-child(2) { grid-column: span 1; grid-row: span 1; }
+        .feature-card:nth-child(3) { grid-column: span 1; grid-row: span 1; }
+        .feature-card:nth-child(4) { grid-column: span 3; grid-row: span 1; }
+        
+        .feature-card:hover { transform: scale(0.99); }
+        .feature-icon { font-size: 40px; margin-bottom: 24px; color: var(--purple); }
+        .feature-title { font-size: 24px; font-weight: 600; margin-bottom: 8px; letter-spacing: -0.02em; }
+        .feature-desc { font-size: 17px; color: var(--text2); line-height: 1.4; font-weight: 500; letter-spacing: -0.01em; }
 
         /* HOW IT WORKS */
         .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-top: 56px; }
@@ -246,36 +257,35 @@
     <!-- NAV -->
     <nav>
         <a href="/" class="nav-brand">
-            <div class="nav-logo">🎨</div>
+            <div class="nav-logo"></div>
             Mockup Studio
         </a>
         <div class="nav-links">
-        <button id="theme-toggle" onclick="toggleTheme()" style="background:none; border:none; padding:6px; cursor:pointer; font-size:18px; margin-right:12px;">🌙</button>
-        <a href="#features" class="nav-link">Features</a>
+            <a href="#features" class="nav-link">Features</a>
             <a href="#how-it-works" class="nav-link">How it works</a>
             <a href="#pricing" class="nav-link">Pricing</a>
+            <button id="theme-toggle" onclick="toggleTheme()" style="background:none; border:none; padding:6px; cursor:pointer; font-size:16px; margin-left:12px; color:var(--text2);">🌙</button>
         </div>
-        <a href="/studio" class="nav-cta">Open Studio →</a>
+        <a href="/studio" class="nav-cta">Open Studio</a>
     </nav>
 
     <!-- HERO -->
     <div class="hero">
         <div class="hero-badge">
-            <span class="dot"></span>
-            AI-Powered Mockup Generator
+            <div class="hero-badge">New</div>
         </div>
         <h1>
-            Create Stunning<br>
-            Mockups <span class="gradient">in Seconds</span>
+            Pro mockups.<br>
+            Zero effort.
         </h1>
         <p>
-            Upload your designs, apply them to any product with perfect perspective warping and AI background removal. No Photoshop needed.
+            The easiest way to put your designs into beautiful, realistic environments. Powered by AI. Perfect for pros.
         </p>
         <div class="hero-actions">
-            <a href="/studio" class="btn-hero-primary">🚀 Start Creating — Free</a>
-            <a href="#how-it-works" class="btn-hero-secondary">See how it works ↓</a>
+            <a href="/studio" class="btn-hero-primary">Start creating</a>
+            <a href="#features" class="btn-hero-secondary">Learn more</a>
         </div>
-        <div class="hero-sub">No credit card required · 20 free credits on signup</div>
+        <div class="hero-sub">No credit card required. Free for guests.</div>
 
         <!-- APP PREVIEW -->
         <div class="hero-preview">
@@ -316,48 +326,41 @@
     </div>
 
     <!-- FEATURES -->
-    <section id="features">
-        <div class="section-inner">
-            <div class="text-center">
-                <div class="section-tag">Features</div>
-                <h2 class="section-title">Everything you need to create <span style="color:var(--purple-light)">perfect mockups</span></h2>
-                <p class="section-sub">A complete mockup workflow from design upload to final export — all in one tool.</p>
+    <section id="features" class="features">
+        <div class="section-inner" style="max-width: 1200px;">
+            <div class="section-header">
+                <h2>Everything you need.</h2>
+                <p>A complete mockup workflow from design upload to final export — all in one tool.</p>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
+            
+            <div class="feature-grid">
+                <!-- Card 1 (Large) -->
+                <div class="feature-card" style="background: var(--bg2);">
                     <div class="feature-icon">🎯</div>
                     <div class="feature-title">Perspective Warp</div>
                     <div class="feature-desc">Drag 4 corner handles to perfectly fit your design onto any surface — t-shirts, mugs, frames, phone cases. Just like Photoshop's Smart Object.</div>
                 </div>
-                <div class="feature-card">
+                <!-- Card 2 (Small) -->
+                <div class="feature-card" style="background: var(--bg2);">
                     <div class="feature-icon">🤖</div>
                     <div class="feature-title">AI Background Removal</div>
-                    <div class="feature-desc">Powered by rembg (U-2-Net AI). Remove backgrounds from any image in 1-2 seconds, completely offline. No subscription to remove.bg needed.</div>
+                    <div class="feature-desc">Powered by U-2-Net AI. Remove backgrounds from any image in 1-2 seconds.</div>
                 </div>
-                <div class="feature-card">
+                <!-- Card 3 (Small) -->
+                <div class="feature-card" style="background: var(--bg2);">
                     <div class="feature-icon">⚡</div>
                     <div class="feature-title">Bulk Generation</div>
-                    <div class="feature-desc">Apply all your designs to all your templates in one click. Generate 100 mockups in the time it takes to make one manually.</div>
+                    <div class="feature-desc">Generate 100 mockups in the time it takes to make one manually.</div>
                 </div>
-                <div class="feature-card">
+                <!-- Card 4 (Wide) -->
+                <div class="feature-card" style="background: var(--bg2);">
                     <div class="feature-icon">✂️</div>
                     <div class="feature-title">Custom Masking</div>
                     <div class="feature-desc">Draw precise clipping masks so your design wraps perfectly around edges, pockets, seams — no overflow outside the product boundary.</div>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔒</div>
-                    <div class="feature-title">100% Private &amp; Local</div>
-                    <div class="feature-desc">Your images never leave your computer. All processing happens locally on your machine — no cloud uploads, no data sharing.</div>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🌐</div>
-                    <div class="feature-title">Access Anywhere</div>
-                    <div class="feature-desc">Run on your computer and access from your phone on the same network. Or self-host to use from anywhere in the world.</div>
-                </div>
             </div>
         </div>
     </section>
-
     <hr class="divider">
 
     <!-- HOW IT WORKS -->
