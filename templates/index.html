@@ -428,7 +428,8 @@
             <span class="icon">⚡</span>
             <span id="credit-count">—</span> credits
         </div>
-        <div class="user-avatar" id="user-avatar-btn" onclick="toggleUserMenu()">?</div>
+        <button class="btn btn-primary" id="nav-login-btn" onclick="showAuthModal()" style="display:none; padding: 6px 14px; font-size: 13px; font-weight: 600; width: auto; margin-left: 10px;">Sign In</button>
+        <div class="user-avatar" id="user-avatar-btn" onclick="toggleUserMenu()" style="display:none;">?</div>
     </div>
 </nav>
 
@@ -445,7 +446,8 @@
 
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="auth-modal">
-    <div class="modal">
+    <div class="modal" style="position:relative;">
+        <button onclick="hideAuthModal()" style="position:absolute; top: 16px; right: 16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--text2); padding:4px;">✕</button>
         <h2>Welcome back 👋</h2>
         <p>Sign in or create an account to start generating mockups</p>
         <div class="modal-tabs">
@@ -815,8 +817,10 @@ async function loadMe() {
 }
 function updateUserUI() {
     const av = document.getElementById('user-avatar-btn');
+    const loginBtn = document.getElementById('nav-login-btn');
     if (!currentUser) {
-        av.textContent = '?';
+        av.style.display = 'none';
+        loginBtn.style.display = 'block';
         document.getElementById('credit-count').textContent = guestCredits;
         document.getElementById('dd-name').textContent = 'Guest';
         document.getElementById('dd-email').textContent = 'Not signed in';
@@ -831,6 +835,8 @@ function updateUserUI() {
         document.getElementById('logout-btn').className = 'user-dropdown-item';
         return;
     }
+    av.style.display = 'flex';
+    loginBtn.style.display = 'none';
     av.textContent = currentUser.name[0].toUpperCase();
     document.getElementById('credit-count').textContent = currentUser.credits;
     document.getElementById('dd-name').textContent = currentUser.name;
@@ -847,6 +853,7 @@ function updateUserUI() {
     warn.classList.toggle('show', currentUser.credits < 10);
 }
 function showAuthModal() { document.getElementById('auth-modal').classList.add('open'); }
+function hideAuthModal() { document.getElementById('auth-modal').classList.remove('open'); }
 function toggleUserMenu() { document.getElementById('user-dropdown').classList.toggle('open'); }
 document.addEventListener('click', e => {
     const dd = document.getElementById('user-dropdown');
