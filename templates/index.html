@@ -506,8 +506,11 @@
             </div>
 
             <!-- SAVE & GENERATE -->
-            <button class="btn btn-ghost" id="btn-save">💾 Save Settings</button>
-            <button class="btn btn-success" id="btn-generate">⚡ Generate All Mockups</button>
+            <button class="btn btn-ghost" id="btn-save" style="margin-bottom:8px;">💾 Save Settings</button>
+            <button class="btn btn-success" id="btn-generate" style="flex-direction:column; padding:12px;">
+                <span>⚡ Generate All Mockups</span>
+                <span id="generate-cost-label" style="font-size:10px; font-weight:600; opacity:0.9; margin-top:4px;">Cost: 0 credits</span>
+            </button>
 
             <!-- AD SLOT (sidebar) -->
             <div class="ad-container" id="sidebar-ad"></div>
@@ -518,7 +521,8 @@
     <main class="main-area">
 
         <!-- DASHBOARD TAB -->
-        <div class="tab-content active scrollable-page" id="tab-dashboard" style="padding:16px 20px;">
+        <div class="tab-content active scrollable-page" id="tab-dashboard" style="padding:24px 20px;">
+            <div style="max-width:800px; margin:0 auto; width:100%;">
             <!-- HEADER ROW -->
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
                 <div>
@@ -566,6 +570,7 @@
 
             <!-- AD -->
             <div class="ad-container" id="dashboard-ad"></div>
+            </div>
         </div>
 
         <!-- EDITOR TAB -->
@@ -831,7 +836,7 @@ async function loadBackgrounds() {
     const files = await res.json();
     const list = document.getElementById('bg-list');
     list.innerHTML = '';
-    if (!files.length) { list.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text-muted)">No templates yet</div>'; return; }
+    if (!files.length) { list.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text-muted)">No templates yet</div>'; updateGenerateCost(); return; }
     files.forEach(file => {
         const item = document.createElement('div');
         item.className = 'file-item';
@@ -841,6 +846,7 @@ async function loadBackgrounds() {
         item.querySelector('.del-btn').onclick = (e) => deleteFile('background', file, e);
         list.appendChild(item);
     });
+    updateGenerateCost();
 }
 
 async function loadDesigns() {
@@ -848,7 +854,7 @@ async function loadDesigns() {
     const files = await res.json();
     const list = document.getElementById('design-list');
     list.innerHTML = '';
-    if (!files.length) { list.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text-muted)">No designs yet. Upload above.</div>'; return; }
+    if (!files.length) { list.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text-muted)">No designs yet. Upload above.</div>'; updateGenerateCost(); return; }
     files.forEach(file => {
         const item = document.createElement('div');
         item.className = 'file-item';
@@ -863,6 +869,18 @@ async function loadDesigns() {
         };
         list.appendChild(item);
     });
+    updateGenerateCost();
+}
+
+function updateGenerateCost() {
+    const bgCount = document.querySelectorAll('#bg-list .file-item').length;
+    const designCount = document.querySelectorAll('#design-list .file-item').length;
+    const total = bgCount * designCount;
+    const cost = total * 2;
+    const lbl = document.getElementById('generate-cost-label');
+    if (lbl) {
+        lbl.textContent = total > 0 ? `Cost: ${cost} credits (${total} mockups)` : 'Upload templates & designs';
+    }
 }
 async function loadConfig() {
     const res = await fetch('/api/config');
