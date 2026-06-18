@@ -605,8 +605,9 @@
                         <div class="upload-area">
                             <input type="file" id="upload-rembg" accept="image/*">
                             <div class="upload-area-icon">🤖</div>
-                            <p><span>Remove background</span> with AI</p>
+                            <p><span>Upload & Remove</span> BG</p>
                         </div>
+                        <button class="btn btn-primary" id="btn-rembg-current" style="margin-top:8px; width: 100%;">🪄 Remove BG of Active Design</button>
                     </div>
         
                     <!-- SAVE & GENERATE -->
@@ -1130,8 +1131,10 @@ document.getElementById('btn-generate').addEventListener('click', doGenerate);
 function quickGenerate() { switchTab('editor'); setTimeout(doGenerate, 100); }
 
 // Design preview
+let currentDesignFileObj = null;
 document.getElementById('upload-design').addEventListener('change', e => {
     const file=e.target.files[0]; if(!file)return;
+    currentDesignFileObj = file;
     const url=URL.createObjectURL(file);
     designImg.onload=()=>{ designW=designImg.naturalWidth; designH=designImg.naturalHeight; designImg.style.display='block'; designImg.style.width=designW+'px'; designImg.style.height=designH+'px'; updateUI(); };
     designImg.src=url;
@@ -1156,14 +1159,31 @@ document.getElementById('upload-bg').addEventListener('change', async e => {
     await loadBackgrounds(); hideLoader(); showToast('Template uploaded!');
 });
 
-// Remove BG
+// Remove BG (Upload New)
 document.getElementById('upload-rembg').addEventListener('change', async e => {
     const file=e.target.files[0]; if(!file)return;
     const fd=new FormData(); fd.append('file',file);
     showLoader('AI is removing background... (first use may take 15-20s)');
     const res=await fetch('/api/remove-bg',{method:'POST',body:fd});
     const data=await res.json(); hideLoader();
-    if(data.status==='success'){ currentUser.credits-=2; updateUserUI(); showToast(`Background removed! Saved as ${data.filename}`); }
+    if(data.status==='success'){ if(currentUser) currentUser.credits-=2; else guestCredits-=2; updateUserUI(); showToast(`Background removed! Saved as ${data.filename}`); }
+    else showToast(data.error||'Failed', 'error');
+});
+
+// Remove BG (Current Active Design)
+document.getElementById('btn-rembg-current').addEventListener('click', async () => {
+    if(!currentDesignFileObj) { showToast('Please preview a design first!', 'warning'); return; }
+    const fd=new FormData(); fd.append('file', currentDesignFileObj);
+    showLoader('AI is removing background... (first use may take 15-20s)');
+    const res=await fetch('/api/remove-bg',{method:'POST',body:fd});
+    const data=await res.json(); hideLoader();
+    if(data.status==='success'){
+        if(currentUser) currentUser.credits-=2; else guestCredits-=2;
+        updateUserUI(); 
+        showToast(`Background removed!`);
+        // Update the active canvas image
+        designImg.src = `/tasarim/${encodeURIComponent(data.filename)}`;
+    }
     else showToast(data.error||'Failed', 'error');
 });
 
