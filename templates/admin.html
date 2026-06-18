@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel — Mockup Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f; --bg-secondary: #12121a; --bg-card: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08); --purple: #7c3aed; --purple-light: #a78bfa;
+            --teal: #06d6a0; --text-primary: #f1f5f9; --text-secondary: #94a3b8;
+            --text-muted: #475569; --danger: #ef4444; --warning: #f59e0b; --success: #10b981;
+            --radius: 12px; --radius-sm: 8px; --shadow: 0 4px 24px rgba(0,0,0,0.4);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+        ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        .admin-navbar {
+            background: rgba(10,10,15,0.95); border-bottom: 1px solid var(--border);
+            padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 100; backdrop-filter: blur(20px);
+        }
+        .admin-brand { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .admin-brand .badge { background: linear-gradient(135deg, var(--purple), var(--teal)); padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+        .back-btn { color: var(--text-secondary); text-decoration: none; font-size: 13px; display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); transition: all 0.2s; }
+        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+
+        .admin-layout { display: flex; min-height: calc(100vh - 60px); }
+        .admin-sidebar { width: 220px; background: var(--bg-secondary); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .admin-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius-sm); cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-secondary); transition: all 0.15s; }
+        .admin-nav-item:hover { background: var(--bg-card); color: var(--text-primary); }
+        .admin-nav-item.active { background: rgba(124,58,237,0.15); color: var(--purple-light); }
+        .admin-main { flex: 1; padding: 28px; overflow-y: auto; }
+
+        .section { display: none; } .section.active { display: block; }
+        .section-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+        .section-sub { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; margin-bottom: 28px; }
+        .stat-mini { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+        .stat-mini .val { font-size: 28px; font-weight: 800; color: var(--purple-light); }
+        .stat-mini .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+        table { width: 100%; border-collapse: collapse; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        thead th { padding: 12px 16px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border); }
+        tbody td { padding: 12px 16px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: inherit; transition: all 0.2s; }
+        .btn-primary { background: linear-gradient(135deg, var(--purple), #6d28d9); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+        .btn-ghost { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); }
+        .btn-ghost:hover { color: var(--text-primary); background: rgba(255,255,255,0.06); }
+        .btn-danger { background: rgba(239,68,68,0.15); color: var(--danger); border: 1px solid rgba(239,68,68,0.3); }
+        .btn-success { background: rgba(16,185,129,0.15); color: var(--success); border: 1px solid rgba(16,185,129,0.3); }
+
+        .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-purple { background: rgba(124,58,237,0.2); color: var(--purple-light); }
+        .badge-teal { background: rgba(6,214,160,0.15); color: var(--teal); }
+        .badge-warning { background: rgba(245,158,11,0.15); color: var(--warning); }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+        .form-input { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--text-primary); font-family: inherit; outline: none; transition: border-color 0.2s; }
+        .form-input:focus { border-color: var(--purple); }
+        .form-check { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 13px; color: var(--text-secondary); }
+        .form-check input { accent-color: var(--purple); width: 16px; height: 16px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
+        .card-title { font-size: 13px; font-weight: 700; margin-bottom: 16px; color: var(--text-secondary); }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 9000; display: none; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 400px; box-shadow: var(--shadow); }
+        .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+        .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px; box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; animation: slideIn 0.3s ease; }
+        .toast.success { border-left: 3px solid var(--success); } .toast.error { border-left: 3px solid var(--danger); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        textarea.form-input { min-height: 80px; resize: vertical; }
+        .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    </style>
+</head>
+<body>
+<nav class="admin-navbar">
+    <div class="admin-brand">
+        🛠️ Admin Panel <span class="badge">ADMIN</span>
+    </div>
+    <a href="/" class="back-btn">← Back to Studio</a>
+</nav>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-nav-item active" data-section="overview">📊 Overview</div>
+        <div class="admin-nav-item" data-section="users">👥 Users</div>
+        <div class="admin-nav-item" data-section="ads">📢 Ad Manager</div>
+        <div class="admin-nav-item" data-section="credits">⚡ Credit Config</div>
+        <div class="admin-nav-item" data-section="site">⚙️ Site Settings</div>
+    </aside>
+    <main class="admin-main">
+
+        <!-- OVERVIEW -->
+        <div class="section active" id="section-overview">
+            <div class="section-title">Overview</div>
+            <div class="section-sub">Live snapshot of your Mockup Studio platform</div>
+            <div class="stats-row" id="stats-row"></div>
+            <div class="card">
+                <div class="card-title">Plan Distribution</div>
+                <div id="plan-dist" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+            </div>
+        </div>
+
+        <!-- USERS -->
+        <div class="section" id="section-users">
+            <div class="section-title">Users</div>
+            <div class="section-sub">Manage accounts, credits and plans</div>
+            <div style="overflow-x:auto;">
+                <table id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th><th>Email</th><th>Plan</th>
+                            <th>Credits</th><th>Generated</th><th>Admin</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- AD MANAGER -->
+        <div class="section" id="section-ads">
+            <div class="section-title">Ad Manager</div>
+            <div class="section-sub">Configure Google AdSense and custom sponsor banners</div>
+
+            <div class="card">
+                <div class="card-title">Google AdSense</div>
+                <div class="form-group">
+                    <label class="form-check">
+                        <input type="checkbox" id="adsense-enabled"> Enable Google AdSense
+                    </label>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">AdSense Client ID</label>
+                        <input class="form-input" id="adsense-client-id" placeholder="ca-pub-XXXXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sidebar Slot ID</label>
+                        <input class="form-input" id="adsense-slot-sidebar" placeholder="1234567890">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Result Page Slot ID</label>
+                    <input class="form-input" id="adsense-slot-result" placeholder="0987654321">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Custom Sponsor Banner</div>
+                <div class="form-group">
+                    <label class="form-check">
+                        <input type="checkbox" id="sponsor-enabled"> Enable Custom Sponsor Banner
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Banner HTML (supports full HTML/CSS)</label>
+                    <textarea class="form-input" id="sponsor-html" placeholder="<div>Your sponsor HTML here</div>"></textarea>
+                </div>
+                <div style="margin-top:12px;margin-bottom:12px;">
+                    <div class="form-label" style="margin-bottom:8px;">Live Preview:</div>
+                    <div id="sponsor-preview" style="padding:10px;background:rgba(255,255,255,0.02);border-radius:8px;border:1px solid var(--border);"></div>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="saveAdConfig()">Save Ad Settings</button>
+        </div>
+
+        <!-- CREDIT CONFIG -->
+        <div class="section" id="section-credits">
+            <div class="section-title">Credit Configuration</div>
+            <div class="section-sub">Adjust credit costs and plan allocations</div>
+
+            <div class="card">
+                <div class="card-title">Action Costs</div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Single Mockup (credits)</label>
+                        <input class="form-input" type="number" id="cost-single" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bulk Generation (credits)</label>
+                        <input class="form-input" type="number" id="cost-bulk" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">AI BG Removal (credits)</label>
+                        <input class="form-input" type="number" id="cost-rembg" min="0">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Free Plan Credits on Signup</div>
+                <div class="form-group">
+                    <label class="form-label">Credits given to new users</label>
+                    <input class="form-input" type="number" id="free-credits" min="0">
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="saveCreditConfig()">Save Credit Settings</button>
+        </div>
+
+        <!-- SITE SETTINGS -->
+        <div class="section" id="section-site">
+            <div class="section-title">Site Settings</div>
+            <div class="section-sub">General platform configuration</div>
+            <div class="card">
+                <div class="form-group">
+                    <label class="form-label">Site Name</label>
+                    <input class="form-input" id="site-name" value="Mockup Studio">
+                </div>
+                <div class="form-group">
+                    <label class="form-check">
+                        <input type="checkbox" id="maintenance-mode"> Maintenance Mode (blocks all non-admin access)
+                    </label>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="saveSiteSettings()">Save Site Settings</button>
+        </div>
+
+    </main>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="edit-user-modal">
+    <div class="modal">
+        <h3>Edit User</h3>
+        <input type="hidden" id="edit-user-id">
+        <div class="form-group">
+            <label class="form-label">Plan</label>
+            <select class="form-input" id="edit-user-plan">
+                <option value="free">Free</option>
+                <option value="pro">Pro</option>
+                <option value="business">Business</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Credits</label>
+            <input class="form-input" type="number" id="edit-user-credits" min="0">
+        </div>
+        <div class="form-group">
+            <label class="form-check">
+                <input type="checkbox" id="edit-user-admin"> Admin Access
+            </label>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="saveUserEdit()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+let allUsers = [];
+let siteConfig = {};
+
+function showToast(msg, type='success') {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<span>${type==='success'?'✅':'❌'}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+}
+
+// NAV
+document.querySelectorAll('.admin-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+        document.querySelectorAll('.admin-nav-item').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
+        item.classList.add('active');
+        document.getElementById(`section-${item.dataset.section}`).classList.add('active');
+    });
+});
+
+// OVERVIEW
+async function loadStats() {
+    const res = await fetch('/api/admin/stats');
+    const stats = await res.json();
+    document.getElementById('stats-row').innerHTML = `
+        <div class="stat-mini"><div class="val">${stats.total_users}</div><div class="lbl">Total Users</div></div>
+        <div class="stat-mini"><div class="val">${stats.total_output_files}</div><div class="lbl">Output Files</div></div>
+        <div class="stat-mini"><div class="val">${stats.total_generated}</div><div class="lbl">Total Generated</div></div>
+    `;
+    document.getElementById('plan-dist').innerHTML = `
+        <span class="badge badge-warning">Free: ${stats.plans.free}</span>
+        <span class="badge badge-purple">Pro: ${stats.plans.pro}</span>
+        <span class="badge badge-teal">Business: ${stats.plans.business}</span>
+    `;
+}
+
+// USERS
+async function loadUsers() {
+    const res = await fetch('/api/admin/users');
+    allUsers = await res.json();
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = allUsers.map(u => `
+        <tr>
+            <td><strong>${u.name}</strong></td>
+            <td style="color:var(--text-secondary)">${u.email}</td>
+            <td><span class="badge badge-${u.plan==='business'?'teal':u.plan==='pro'?'purple':'warning'}">${u.plan}</span></td>
+            <td><span style="color:var(--purple-light);font-weight:600;">⚡ ${u.credits}</span></td>
+            <td>${u.total_generated||0}</td>
+            <td>${u.is_admin?'<span class="badge badge-teal">Admin</span>':'—'}</td>
+            <td><button class="btn btn-ghost" onclick="openEditUser(${u.id})">Edit</button></td>
+        </tr>
+    `).join('');
+}
+
+function openEditUser(id) {
+    const u = allUsers.find(x => x.id === id);
+    if (!u) return;
+    document.getElementById('edit-user-id').value = u.id;
+    document.getElementById('edit-user-plan').value = u.plan;
+    document.getElementById('edit-user-credits').value = u.credits;
+    document.getElementById('edit-user-admin').checked = u.is_admin;
+    document.getElementById('edit-user-modal').classList.add('open');
+}
+function closeModal() { document.getElementById('edit-user-modal').classList.remove('open'); }
+async function saveUserEdit() {
+    const id = parseInt(document.getElementById('edit-user-id').value);
+    const payload = {
+        plan: document.getElementById('edit-user-plan').value,
+        credits: parseInt(document.getElementById('edit-user-credits').value),
+        is_admin: document.getElementById('edit-user-admin').checked
+    };
+    const res = await fetch(`/api/admin/users/${id}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.status === 'success') { closeModal(); showToast('User updated!'); loadUsers(); }
+    else showToast('Error updating user', 'error');
+}
+
+// SITE CONFIG
+async function loadSiteConfig() {
+    const res = await fetch('/api/site-config');
+    siteConfig = await res.json();
+    // Ads
+    document.getElementById('adsense-enabled').checked = siteConfig.adsense_enabled||false;
+    document.getElementById('adsense-client-id').value = siteConfig.adsense_client_id||'';
+    document.getElementById('adsense-slot-sidebar').value = siteConfig.adsense_slot_sidebar||'';
+    document.getElementById('adsense-slot-result').value = siteConfig.adsense_slot_result||'';
+    document.getElementById('sponsor-enabled').checked = siteConfig.sponsor_enabled||false;
+    document.getElementById('sponsor-html').value = siteConfig.sponsor_banner_html||'';
+    document.getElementById('sponsor-preview').innerHTML = siteConfig.sponsor_banner_html||'';
+    // Credits
+    const costs = siteConfig.credit_costs||{};
+    document.getElementById('cost-single').value = costs.generate_single||1;
+    document.getElementById('cost-bulk').value = costs.generate_bulk||5;
+    document.getElementById('cost-rembg').value = costs.remove_bg||2;
+    document.getElementById('free-credits').value = (siteConfig.plans?.free?.credits)||20;
+    // Site
+    document.getElementById('site-name').value = siteConfig.site_name||'Mockup Studio';
+    document.getElementById('maintenance-mode').checked = siteConfig.maintenance_mode||false;
+}
+document.getElementById('sponsor-html').addEventListener('input', e => {
+    document.getElementById('sponsor-preview').innerHTML = e.target.value;
+});
+
+async function saveAdConfig() {
+    const payload = {
+        adsense_enabled: document.getElementById('adsense-enabled').checked,
+        adsense_client_id: document.getElementById('adsense-client-id').value,
+        adsense_slot_sidebar: document.getElementById('adsense-slot-sidebar').value,
+        adsense_slot_result: document.getElementById('adsense-slot-result').value,
+        sponsor_enabled: document.getElementById('sponsor-enabled').checked,
+        sponsor_banner_html: document.getElementById('sponsor-html').value,
+    };
+    const res = await fetch('/api/admin/site-config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    if(data.status==='success') showToast('Ad settings saved!'); else showToast('Error!','error');
+}
+async function saveCreditConfig() {
+    const plans = siteConfig.plans||{};
+    plans.free = {...(plans.free||{}), credits: parseInt(document.getElementById('free-credits').value)};
+    const payload = {
+        credit_costs: {
+            generate_single: parseInt(document.getElementById('cost-single').value),
+            generate_bulk: parseInt(document.getElementById('cost-bulk').value),
+            remove_bg: parseInt(document.getElementById('cost-rembg').value),
+        },
+        plans
+    };
+    const res = await fetch('/api/admin/site-config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    if(data.status==='success') showToast('Credit settings saved!'); else showToast('Error!','error');
+}
+async function saveSiteSettings() {
+    const payload = {
+        site_name: document.getElementById('site-name').value,
+        maintenance_mode: document.getElementById('maintenance-mode').checked
+    };
+    const res = await fetch('/api/admin/site-config', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
+    const data = await res.json();
+    if(data.status==='success') showToast('Site settings saved!'); else showToast('Error!','error');
+}
+
+async function init() {
+    await loadSiteConfig();
+    await loadStats();
+    await loadUsers();
+}
+init();
+</script>
+</body>
+</html>

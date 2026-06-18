@@ -1,544 +1,1063 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Mockup Studio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup Studio — Professional Mockup Generator</title>
+    <meta name="description" content="Create stunning mockups with AI-powered background removal and perspective warping. Upload your designs, generate mockups in seconds.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background-color: #222; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
-        .sidebar { width: 300px; background: #111; padding: 20px; box-sizing: border-box; overflow-y: auto; border-right: 1px solid #444; display: flex; flex-direction: column; gap: 20px; }
-        .main-content { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; overflow-y: auto; }
-        
-        h2, h3 { margin-top: 0; color: #00ffcc; }
-        
-        .panel { background: #333; padding: 15px; border-radius: 8px; }
-        button { background: #00ffcc; color: #000; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; transition: background 0.2s;}
-        button:hover { background: #00ccaa; }
-        button.danger { background: #ff4444; color: white; }
-        button.danger:hover { background: #cc3333; }
-        button.active { background: #ff00cc; color: white; }
-        
-        .file-upload { display: block; margin-bottom: 10px; }
-        .file-upload input { display: none; }
-        .file-upload label { display: block; background: #444; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; border: 1px dashed #888; }
-        .file-upload label:hover { background: #555; }
-        
-        .list-group { list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; background: #222; border-radius: 4px; }
-        .list-group li { padding: 10px; border-bottom: 1px solid #333; cursor: pointer; }
-        .list-group li:hover { background: #444; }
-        .list-group li.selected { background: #00ffcc; color: #000; font-weight: bold; }
-
-        .workspace-container { 
-            position: relative; margin-top: 20px; border: 2px dashed #666; 
-            background: #111; display: inline-block; user-select: none;
-            max-width: 100%; max-height: 80vh;
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: rgba(255,255,255,0.04);
+            --bg-card-hover: rgba(255,255,255,0.07);
+            --border: rgba(255,255,255,0.08);
+            --border-active: rgba(124,58,237,0.5);
+            --purple: #7c3aed;
+            --purple-light: #a78bfa;
+            --purple-dark: #5b21b6;
+            --teal: #06d6a0;
+            --teal-dark: #059669;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --shadow-purple: 0 4px 24px rgba(124,58,237,0.3);
+            --sidebar-w: 280px;
+            --navbar-h: 64px;
         }
-        
-        #tshirt-img { display: block; max-width: 100%; max-height: 80vh; height: auto; pointer-events: none; }
 
-        #clip-container {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; clip-path: url(#my-clip); -webkit-clip-path: url(#my-clip);
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { font-size: 14px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow: hidden;
         }
-        
-        #design-img { position: absolute; top: 0; left: 0; transform-origin: 0 0; opacity: 0.85; pointer-events: none; display: none; }
 
-        svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; overflow: visible; }
-        
-        #poly-visible { fill: rgba(0, 255, 204, 0.1); stroke: #00ffcc; stroke-width: 2; stroke-dasharray: 4; cursor: move; pointer-events: fill; }
-        #poly-mask { fill: rgba(255, 0, 0, 0.1); stroke: #ff4444; stroke-width: 2; pointer-events: none; }
-        .mask-point { fill: #ff4444; pointer-events: fill; cursor: pointer; }
-        
-        .edge-line { stroke: transparent; stroke-width: 15; pointer-events: fill; }
-        .edge-line.horizontal { cursor: ns-resize; }
-        .edge-line.vertical { cursor: ew-resize; }
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
 
+        /* NAVBAR */
+        .navbar {
+            position: fixed; top: 0; left: 0; right: 0; height: var(--navbar-h);
+            background: rgba(10,10,15,0.9); backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 24px; gap: 8px;
+            z-index: 1000;
+        }
+        .navbar-brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 18px; font-weight: 800; color: var(--text-primary);
+            text-decoration: none; margin-right: 16px;
+        }
+        .navbar-brand .logo-icon {
+            width: 32px; height: 32px; background: linear-gradient(135deg, var(--purple), var(--teal));
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .nav-tabs { display: flex; gap: 4px; flex: 1; }
+        .nav-tab {
+            padding: 8px 16px; border-radius: var(--radius-sm); cursor: pointer;
+            color: var(--text-secondary); font-weight: 500; transition: all 0.2s;
+            border: none; background: transparent; font-size: 13px; font-family: inherit;
+        }
+        .nav-tab:hover { color: var(--text-primary); background: var(--bg-card-hover); }
+        .nav-tab.active { color: var(--purple-light); background: rgba(124,58,237,0.15); }
+        .navbar-right { display: flex; align-items: center; gap: 12px; }
+        .credit-badge {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
+            border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600;
+            color: var(--purple-light); cursor: pointer; transition: all 0.2s;
+        }
+        .credit-badge:hover { background: rgba(124,58,237,0.25); }
+        .credit-badge .icon { font-size: 14px; }
+        .user-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--teal));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 14px; cursor: pointer;
+            border: 2px solid transparent; transition: all 0.2s;
+        }
+        .user-avatar:hover { border-color: var(--purple-light); }
+
+        /* LAYOUT */
+        .app-layout {
+            display: flex; height: 100vh; padding-top: var(--navbar-h);
+        }
+        .sidebar {
+            width: var(--sidebar-w); background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sidebar-content { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        .main-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* TABS CONTENT */
+        .tab-content { display: none; height: 100%; overflow-y: auto; }
+        .tab-content.active { display: flex; flex-direction: column; }
+
+        /* CARDS / PANELS */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 16px;
+            transition: all 0.2s;
+        }
+        .card:hover { border-color: rgba(255,255,255,0.12); }
+        .card-title {
+            font-size: 11px; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 12px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 10px 16px; border-radius: var(--radius-sm); font-size: 13px;
+            font-weight: 600; cursor: pointer; border: none; font-family: inherit;
+            transition: all 0.2s; text-decoration: none; width: 100%;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple), #6d28d9);
+            color: white; box-shadow: var(--shadow-purple);
+        }
+        .btn-primary:hover { background: linear-gradient(135deg, #8b5cf6, var(--purple)); transform: translateY(-1px); }
+        .btn-success {
+            background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+            color: white;
+        }
+        .btn-success:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-ghost {
+            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary);
+        }
+        .btn-ghost:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-sm { padding: 7px 12px; font-size: 12px; }
+        .btn-icon-only { width: 36px; height: 36px; padding: 0; }
+
+        /* FILE UPLOAD */
+        .upload-area {
+            border: 1.5px dashed rgba(255,255,255,0.15); border-radius: var(--radius-sm);
+            padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;
+            background: transparent; position: relative; overflow: hidden;
+        }
+        .upload-area:hover { border-color: var(--purple); background: rgba(124,58,237,0.05); }
+        .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+        .upload-area-icon { font-size: 22px; margin-bottom: 6px; }
+        .upload-area p { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+        .upload-area span { color: var(--purple-light); font-weight: 500; }
+
+        /* FILE LIST */
+        .file-list { display: flex; flex-direction: column; gap: 4px; max-height: 180px; overflow-y: auto; }
+        .file-item {
+            display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+            border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s;
+            border: 1px solid transparent; font-size: 12px; color: var(--text-secondary);
+        }
+        .file-item:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+        .file-item.selected { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.4); color: var(--purple-light); }
+        .file-item .file-thumb {
+            width: 28px; height: 28px; border-radius: 4px; object-fit: cover;
+            background: rgba(255,255,255,0.05); flex-shrink: 0;
+        }
+        .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+        /* EDITOR WORKSPACE */
+        .editor-layout { display: flex; height: 100%; }
+        .editor-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; overflow: hidden; }
+        .workspace-container {
+            position: relative; display: inline-block; user-select: none;
+            border-radius: var(--radius); overflow: visible;
+            box-shadow: 0 0 0 1px var(--border), var(--shadow);
+            max-width: 100%; max-height: calc(100vh - var(--navbar-h) - 80px);
+        }
+        #tshirt-img { display: block; max-width: 100%; max-height: calc(100vh - var(--navbar-h) - 80px); border-radius: var(--radius); pointer-events: none; }
+        #clip-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; clip-path: url(#my-clip); }
+        #design-img { position: absolute; top: 0; left: 0; transform-origin: 0 0; opacity: 0.9; pointer-events: none; display: none; }
+        #svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; overflow: visible; display: none; }
+        #poly-visible { fill: rgba(124,58,237,0.08); stroke: var(--purple-light); stroke-width: 2; stroke-dasharray: 5,3; cursor: move; pointer-events: fill; }
+        #poly-mask { fill: rgba(239,68,68,0.12); stroke: var(--danger); stroke-width: 2; pointer-events: none; }
+        .mask-point { fill: var(--danger); pointer-events: fill; cursor: pointer; }
+        .edge-line { stroke: transparent; stroke-width: 16; pointer-events: fill; }
         .handle {
-            position: absolute; width: 20px; height: 20px; background: #00ffcc; 
-            border: 2px solid #fff; border-radius: 50%; 
-            transform: translate(-50%, -50%); cursor: grab;
-            box-shadow: 0 0 5px rgba(0,0,0,0.5); z-index: 20;
+            position: absolute; width: 18px; height: 18px;
+            background: var(--purple); border: 2.5px solid white;
+            border-radius: 50%; transform: translate(-50%,-50%); cursor: grab;
+            z-index: 20; display: none; box-shadow: 0 2px 8px rgba(124,58,237,0.5);
+            transition: transform 0.1s, background 0.1s;
         }
-        .handle:active { cursor: grabbing; background: #ff00cc; }
-        
-        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; color: white; justify-content: center; align-items: center; font-size: 24px; flex-direction: column; }
-        .spinner { border: 8px solid #333; border-top: 8px solid #00ffcc; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 20px;}
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .handle:hover { transform: translate(-50%,-50%) scale(1.2); background: var(--purple-light); }
+        .handle:active { cursor: grabbing; }
+        .workspace-placeholder {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 16px; padding: 60px; color: var(--text-muted); text-align: center;
+        }
+        .workspace-placeholder .big-icon { font-size: 64px; opacity: 0.3; }
+        .workspace-placeholder h3 { font-size: 18px; color: var(--text-secondary); }
+        .workspace-placeholder p { font-size: 13px; line-height: 1.6; }
 
+        /* DASHBOARD */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 20px; transition: all 0.2s;
+        }
+        .stat-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
+        .stat-card .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+        .stat-card .stat-value { font-size: 32px; font-weight: 800; }
+        .stat-card .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .stat-purple .stat-value { color: var(--purple-light); }
+        .stat-teal .stat-value { color: var(--teal); }
+        .stat-warning .stat-value { color: var(--warning); }
+
+        /* PRICING */
+        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+        .pricing-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 24px; position: relative;
+            transition: all 0.2s;
+        }
+        .pricing-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+        .pricing-card.featured { border-color: var(--purple); background: rgba(124,58,237,0.08); }
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+            background: var(--purple); color: white; font-size: 10px; font-weight: 700;
+            padding: 3px 12px; border-radius: 20px; letter-spacing: 0.1em;
+        }
+        .plan-name { font-size: 14px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; }
+        .plan-price { font-size: 36px; font-weight: 800; margin-bottom: 4px; }
+        .plan-price span { font-size: 14px; font-weight: 400; color: var(--text-muted); }
+        .plan-credits { font-size: 13px; color: var(--purple-light); margin-bottom: 20px; font-weight: 600; }
+        .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+        .plan-features li { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+        .plan-features li::before { content: '✓'; color: var(--teal); font-weight: 700; }
+
+        /* GALLERY */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .gallery-item { position: relative; border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 1; background: var(--bg-card); border: 1px solid var(--border); cursor: pointer; group: true; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .gallery-item:hover img { transform: scale(1.05); }
+        .gallery-item .overlay {
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6); opacity: 0;
+            display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.2s;
+        }
+        .gallery-item:hover .overlay { opacity: 1; }
+
+        /* TOASTS */
+        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: var(--radius-sm); padding: 14px 18px; font-size: 13px;
+            box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px;
+            animation: slideIn 0.3s ease; max-width: 320px;
+        }
+        .toast.success { border-left: 3px solid var(--success); }
+        .toast.error { border-left: 3px solid var(--danger); }
+        .toast.warning { border-left: 3px solid var(--warning); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { to { transform: translateX(120%); opacity: 0; } }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            z-index: 9000; display: none; align-items: center; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px; width: 100%; max-width: 440px;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+            animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn { from { transform: scale(0.95) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+        .modal h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
+        .modal p { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; }
+        .modal-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+        .modal-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .modal-tab.active { color: var(--purple-light); border-color: var(--purple); }
+        .modal-form { display: none; flex-direction: column; gap: 14px; }
+        .modal-form.active { display: flex; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+        .form-input {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+            padding: 11px 14px; font-size: 13px; color: var(--text-primary); font-family: inherit;
+            transition: border-color 0.2s; outline: none;
+        }
+        .form-input:focus { border-color: var(--purple); }
+        .form-divider { text-align: center; color: var(--text-muted); font-size: 12px; position: relative; }
+        .form-divider::before, .form-divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border); }
+        .form-divider::before { left: 0; } .form-divider::after { right: 0; }
+
+        /* LOADER OVERLAY */
+        .loader-overlay {
+            position: fixed; inset: 0; background: rgba(10,10,15,0.85); backdrop-filter: blur(4px);
+            z-index: 9998; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 20px;
+        }
+        .loader-overlay.open { display: flex; }
+        .spinner { width: 48px; height: 48px; border: 3px solid rgba(124,58,237,0.2); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-text { font-size: 15px; color: var(--text-secondary); }
+
+        /* AD AREAS */
+        .ad-container { border-radius: var(--radius-sm); overflow: hidden; }
+        .ad-placeholder { background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 12px; text-align: center; font-size: 11px; color: var(--text-muted); }
+
+        /* BADGE */
+        .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-purple { background: rgba(124,58,237,0.2); color: var(--purple-light); }
+        .badge-teal { background: rgba(6,214,160,0.15); color: var(--teal); }
+        .badge-warning { background: rgba(245,158,11,0.15); color: var(--warning); }
+
+        /* USER MENU */
+        .user-dropdown {
+            position: absolute; top: calc(var(--navbar-h) + 8px); right: 16px;
+            background: var(--bg-secondary); border: 1px solid var(--border);
+            border-radius: var(--radius); width: 220px; z-index: 1001;
+            box-shadow: var(--shadow); display: none; overflow: hidden;
+        }
+        .user-dropdown.open { display: block; }
+        .user-dropdown-header { padding: 16px; border-bottom: 1px solid var(--border); }
+        .user-dropdown-header .name { font-weight: 700; font-size: 14px; }
+        .user-dropdown-header .email { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+        .user-dropdown-item { padding: 10px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); transition: all 0.15s; }
+        .user-dropdown-item:hover { background: var(--bg-card-hover); color: var(--text-primary); }
+        .user-dropdown-item.danger:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+
+        /* PROGRESS BAR */
+        .progress-bar-container { background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--purple), var(--teal)); border-radius: 4px; transition: width 0.4s ease; width: 0%; }
+
+        /* CREDIT LOW WARNING */
+        .credit-warning {
+            background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+            border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px;
+            color: var(--warning); display: none; align-items: center; gap: 10px; margin-bottom: 12px;
+        }
+        .credit-warning.show { display: flex; }
+
+        /* Section headers */
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .section-header h2 { font-size: 22px; font-weight: 800; }
+
+        /* Scrollable main areas */
+        .scrollable-page { padding: 28px; overflow-y: auto; height: 100%; }
     </style>
 </head>
 <body>
-    <div id="loader">
-        <div class="spinner"></div>
-        <div id="loader-text">İşleniyor...</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="#" class="navbar-brand">
+        <div class="logo-icon">🎨</div>
+        Mockup Studio
+    </a>
+    <div class="nav-tabs">
+        <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
+        <button class="nav-tab" data-tab="editor">Editor</button>
+        <button class="nav-tab" data-tab="gallery">Gallery</button>
+        <button class="nav-tab" data-tab="pricing">Pricing</button>
     </div>
-
-    <div class="sidebar">
-        <h2>Mockup Studio</h2>
-        
-        <div class="panel">
-            <h3>Şablonlar (Arkaplan)</h3>
-            <ul class="list-group" id="bg-list"></ul>
-            <div class="file-upload" style="margin-top: 10px;">
-                <label>
-                    Yeni Şablon Yükle
-                    <input type="file" id="upload-bg" accept="image/*">
-                </label>
-            </div>
+    <div class="navbar-right">
+        <div class="credit-badge" id="credit-badge" onclick="switchTab('pricing')">
+            <span class="icon">⚡</span>
+            <span id="credit-count">—</span> credits
         </div>
+        <div class="user-avatar" id="user-avatar-btn" onclick="toggleUserMenu()">?</div>
+    </div>
+</nav>
 
-        <div class="panel">
-            <h3>Tasarımlar (Baskı)</h3>
-            <div class="file-upload">
-                <label>
-                    Tasarım Yükle (Çoklu)
+<!-- USER DROPDOWN -->
+<div class="user-dropdown" id="user-dropdown">
+    <div class="user-dropdown-header">
+        <div class="name" id="dd-name">—</div>
+        <div class="email" id="dd-email">—</div>
+    </div>
+    <div class="user-dropdown-item" onclick="switchTab('pricing')">⚡ Buy Credits</div>
+    <div class="user-dropdown-item" id="admin-link" style="display:none;" onclick="window.open('/admin','_blank')">🛠️ Admin Panel</div>
+    <div class="user-dropdown-item danger" id="logout-btn" onclick="doLogout()">↩ Sign Out</div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="auth-modal">
+    <div class="modal">
+        <h2>Welcome back 👋</h2>
+        <p>Sign in or create an account to start generating mockups</p>
+        <div class="modal-tabs">
+            <div class="modal-tab active" data-authtab="login">Sign In</div>
+            <div class="modal-tab" data-authtab="register">Create Account</div>
+        </div>
+        <form class="modal-form active" id="login-form">
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" type="email" id="login-email" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input class="form-input" type="password" id="login-password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Sign In →</button>
+        </form>
+        <form class="modal-form" id="register-form">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input class="form-input" type="text" id="reg-name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-input" type="email" id="reg-email" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input class="form-input" type="password" id="reg-password" placeholder="Min. 6 characters" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Account & Get 20 Free Credits →</button>
+        </form>
+    </div>
+</div>
+
+<!-- LOADER -->
+<div class="loader-overlay" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text" id="loader-text">Processing...</div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- APP LAYOUT -->
+<div class="app-layout">
+    <!-- SIDEBAR (Editor only) -->
+    <aside class="sidebar" id="sidebar" style="display:none;">
+        <div class="sidebar-content">
+
+            <div class="credit-warning" id="credit-warning">
+                ⚠️ Low credits! <a href="#" onclick="switchTab('pricing')" style="color:var(--warning);font-weight:600;">Top up →</a>
+            </div>
+
+            <!-- TEMPLATES -->
+            <div class="card">
+                <div class="card-title">Background Templates</div>
+                <div class="file-list" id="bg-list"></div>
+                <div style="margin-top:10px;">
+                    <div class="upload-area">
+                        <input type="file" id="upload-bg" accept="image/*">
+                        <div class="upload-area-icon">🖼️</div>
+                        <p><span>Upload</span> new template</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DESIGNS -->
+            <div class="card">
+                <div class="card-title">Designs (Bulk Upload)</div>
+                <div class="upload-area">
                     <input type="file" id="upload-designs-bulk" accept="image/*" multiple>
-                </label>
+                    <div class="upload-area-icon">🎨</div>
+                    <p><span>Upload</span> designs for production</p>
+                </div>
             </div>
-            <p style="font-size: 12px; color: #aaa; margin: 0;">Bu tasarımlar seçili tüm şablonlara basılacaktır.</p>
-        </div>
 
-        <div class="panel">
-            <h3>Ayarlar</h3>
-            <button id="btn-draw-mask" class="danger">Manuel Kırpma Çiz</button>
-            <button id="btn-clear-mask" style="background: #555;">Kırpmayı Temizle</button>
-            <button id="btn-save" style="margin-top: 10px;">Ayarları Kaydet</button>
-        </div>
-        
-        <div class="panel">
-            <h3>Yapay Zeka Araçları</h3>
-            <div class="file-upload">
-                <label>
-                    Arkaplanı Temizle (rembg)
+            <!-- CONTROLS -->
+            <div class="card">
+                <div class="card-title">Warp Controls</div>
+                <button class="btn btn-danger btn-sm" id="btn-draw-mask" style="margin-bottom:8px;">✂️ Draw Mask</button>
+                <button class="btn btn-ghost btn-sm" id="btn-clear-mask">🗑️ Clear Mask</button>
+                <div style="margin-top:10px;">
+                    <div class="upload-area">
+                        <input type="file" id="upload-design" accept="image/*">
+                        <div class="upload-area-icon">👁️</div>
+                        <p><span>Preview</span> a design</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI TOOLS -->
+            <div class="card">
+                <div class="card-title">AI Tools — 2 credits</div>
+                <div class="upload-area">
                     <input type="file" id="upload-rembg" accept="image/*">
-                </label>
-            </div>
-            <p style="font-size: 12px; color: #aaa; margin: 0;">(Görselin arka planını siler ve Tasarımlar klasörüne kaydeder)</p>
-        </div>
-
-        <div class="panel">
-            <h3>Üretim</h3>
-            <button id="btn-generate" class="active">Tüm Mockupları Üret</button>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <div style="width: 100%; max-width: 800px; display: flex; justify-content: space-between; align-items: center;">
-            <h3 id="current-bg-title">Şablon Seçiniz</h3>
-            <div class="file-upload" style="margin: 0;">
-                <label style="padding: 5px 10px;">
-                    Önizleme Tasarımı Değiştir
-                    <input type="file" id="upload-design" accept="image/*">
-                </label>
-            </div>
-        </div>
-
-        <div class="workspace-container" id="workspace">
-            <img id="tshirt-img" src="" alt="Tişört buraya gelecek" style="display:none;">
-            
-            <svg width="0" height="0" style="position:absolute;">
-                <defs>
-                    <clipPath id="my-clip">
-                        <polygon id="poly-clip" points="0,0 0,0 0,0 0,0" />
-                    </clipPath>
-                </defs>
-            </svg>
-
-            <div id="clip-container">
-                <img id="design-img" src="" alt="Tasarım önizleme">
+                    <div class="upload-area-icon">🤖</div>
+                    <p><span>Remove background</span> with AI</p>
+                </div>
             </div>
 
-            <svg id="svg-overlay" style="display:none;">
-                <polygon id="poly-mask" points="" />
-                <g id="mask-points-group"></g>
+            <!-- SAVE & GENERATE -->
+            <button class="btn btn-ghost" id="btn-save">💾 Save Settings</button>
+            <button class="btn btn-success" id="btn-generate">⚡ Generate All Mockups</button>
 
-                <polygon id="poly-visible" points="0,0 0,0 0,0 0,0" />
-                <line id="edge-top" class="edge-line horizontal" x1="0" y1="0" x2="0" y2="0" />
-                <line id="edge-right" class="edge-line vertical" x1="0" y1="0" x2="0" y2="0" />
-                <line id="edge-bottom" class="edge-line horizontal" x1="0" y1="0" x2="0" y2="0" />
-                <line id="edge-left" class="edge-line vertical" x1="0" y1="0" x2="0" y2="0" />
-            </svg>
-
-            <div class="handle" id="pt-tl" style="display:none;" title="Sol Üst"></div>
-            <div class="handle" id="pt-tr" style="display:none;" title="Sağ Üst"></div>
-            <div class="handle" id="pt-br" style="display:none;" title="Sağ Alt"></div>
-            <div class="handle" id="pt-bl" style="display:none;" title="Sol Alt"></div>
+            <!-- AD SLOT (sidebar) -->
+            <div class="ad-container" id="sidebar-ad"></div>
         </div>
-    </div>
+    </aside>
 
-    <script>
-        const bgList = document.getElementById('bg-list');
-        const currentBgTitle = document.getElementById('current-bg-title');
-        const tshirtImg = document.getElementById('tshirt-img');
-        const designImg = document.getElementById('design-img');
-        const svgOverlay = document.getElementById('svg-overlay');
-        const workspace = document.getElementById('workspace');
-        const loader = document.getElementById('loader');
-        const loaderText = document.getElementById('loader-text');
+    <!-- MAIN -->
+    <main class="main-area">
 
-        let currentBgFile = null;
-        let globalConfig = {};
-        
-        let points = [{x: 100, y: 100}, {x: 300, y: 100}, {x: 300, y: 350}, {x: 100, y: 350}];
-        let maskPoints = [];
-        let isDrawingMask = false;
-        
-        let imgNaturalWidth = 1, imgNaturalHeight = 1;
-        let designW = 100, designH = 100;
+        <!-- DASHBOARD TAB -->
+        <div class="tab-content active scrollable-page" id="tab-dashboard">
+            <div class="section-header">
+                <div>
+                    <h2 id="welcome-msg">Welcome back! 👋</h2>
+                    <p style="color:var(--text-secondary);font-size:13px;margin-top:4px;">Here's your Mockup Studio overview</p>
+                </div>
+                <button class="btn btn-primary" style="width:auto;" onclick="switchTab('editor')">🎨 Open Editor</button>
+            </div>
+            <div class="dashboard-grid" style="margin-bottom:28px;">
+                <div class="stat-card stat-purple">
+                    <div class="stat-label">Credits Remaining</div>
+                    <div class="stat-value" id="stat-credits">—</div>
+                    <div class="stat-sub">Current plan: <span id="stat-plan" class="badge badge-purple">—</span></div>
+                </div>
+                <div class="stat-card stat-teal">
+                    <div class="stat-label">Mockups Generated</div>
+                    <div class="stat-value" id="stat-generated">0</div>
+                    <div class="stat-sub">Total in your account</div>
+                </div>
+                <div class="stat-card stat-warning">
+                    <div class="stat-label">Output Files</div>
+                    <div class="stat-value" id="stat-output">0</div>
+                    <div class="stat-sub">Ready to download</div>
+                </div>
+            </div>
 
-        // UI elemanları
-        const handles = [
-            document.getElementById('pt-tl'), document.getElementById('pt-tr'),
-            document.getElementById('pt-br'), document.getElementById('pt-bl')
-        ];
-        const edges = [
-            document.getElementById('edge-top'), document.getElementById('edge-right'),
-            document.getElementById('edge-bottom'), document.getElementById('edge-left')
-        ];
-        const polyVisible = document.getElementById('poly-visible');
-        const polyClip = document.getElementById('poly-clip');
-        const polyMask = document.getElementById('poly-mask');
-        const maskPointsGroup = document.getElementById('mask-points-group');
+            <!-- QUICK ACTIONS -->
+            <div class="section-header" style="margin-top:8px;">
+                <h2 style="font-size:18px;">Quick Actions</h2>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:28px;">
+                <div class="card" style="cursor:pointer;text-align:center;padding:24px;" onclick="switchTab('editor')">
+                    <div style="font-size:32px;margin-bottom:10px;">🎨</div>
+                    <div style="font-weight:700;">Open Editor</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Set up warp points & masks</div>
+                </div>
+                <div class="card" style="cursor:pointer;text-align:center;padding:24px;" onclick="quickGenerate()">
+                    <div style="font-size:32px;margin-bottom:10px;">⚡</div>
+                    <div style="font-weight:700;">Generate All</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Run production batch</div>
+                </div>
+                <div class="card" style="cursor:pointer;text-align:center;padding:24px;" onclick="switchTab('gallery')">
+                    <div style="font-size:32px;margin-bottom:10px;">🖼️</div>
+                    <div style="font-weight:700;">View Gallery</div>
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;">Browse & download results</div>
+                </div>
+            </div>
 
-        let draggingType = null; 
-        let draggingIdx = -1;
-        let dragStartX = 0, dragStartY = 0;
-        let originalPoints = [];
+            <!-- AD (result slot - show on dashboard for free users) -->
+            <div class="ad-container" id="dashboard-ad"></div>
+        </div>
 
-        // Başlangıç Yüklemeleri
-        async function loadBackgrounds() {
-            const res = await fetch('/api/backgrounds');
-            const files = await res.json();
-            bgList.innerHTML = '';
-            files.forEach(file => {
-                const li = document.createElement('li');
-                li.innerText = file;
-                li.onclick = () => selectBackground(file, li);
-                bgList.appendChild(li);
-            });
+        <!-- EDITOR TAB -->
+        <div class="tab-content" id="tab-editor">
+            <div class="editor-layout">
+                <div class="editor-main">
+                    <div id="workspace-placeholder" class="workspace-placeholder">
+                        <div class="big-icon">🎨</div>
+                        <h3>No template selected</h3>
+                        <p>Choose a background template from the left panel to start setting up warp points and masks</p>
+                    </div>
+                    <div class="workspace-container" id="workspace" style="display:none;">
+                        <img id="tshirt-img" src="" alt="">
+                        <svg width="0" height="0" style="position:absolute;">
+                            <defs><clipPath id="my-clip"><polygon id="poly-clip" points="0,0 0,0 0,0 0,0"/></clipPath></defs>
+                        </svg>
+                        <div id="clip-container"><img id="design-img" src="" alt=""></div>
+                        <svg id="svg-overlay">
+                            <polygon id="poly-mask" points=""/>
+                            <g id="mask-points-group"></g>
+                            <polygon id="poly-visible" points="0,0 0,0 0,0 0,0"/>
+                            <line id="edge-top" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
+                            <line id="edge-right" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
+                            <line id="edge-bottom" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
+                            <line id="edge-left" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
+                        </svg>
+                        <div class="handle" id="pt-tl"></div>
+                        <div class="handle" id="pt-tr"></div>
+                        <div class="handle" id="pt-br"></div>
+                        <div class="handle" id="pt-bl"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- GALLERY TAB -->
+        <div class="tab-content scrollable-page" id="tab-gallery">
+            <div class="section-header">
+                <div>
+                    <h2>Gallery</h2>
+                    <p style="color:var(--text-secondary);font-size:13px;margin-top:4px;">All your generated mockups</p>
+                </div>
+                <button class="btn btn-ghost" style="width:auto;" id="refresh-gallery-btn">🔄 Refresh</button>
+            </div>
+            <div class="gallery-grid" id="gallery-grid">
+                <div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;text-align:center;padding:40px;">
+                    Loading gallery...
+                </div>
+            </div>
+        </div>
+
+        <!-- PRICING TAB -->
+        <div class="tab-content scrollable-page" id="tab-pricing">
+            <div class="section-header">
+                <div>
+                    <h2>Plans & Credits</h2>
+                    <p style="color:var(--text-secondary);font-size:13px;margin-top:4px;">Choose the right plan for your workflow</p>
+                </div>
+            </div>
+
+            <div class="pricing-grid" id="pricing-grid"></div>
+
+            <div style="margin-top:40px;">
+                <h2 style="font-size:18px;margin-bottom:20px;">Credit Packages (Top Up)</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;" id="credit-packages-grid"></div>
+            </div>
+
+            <div style="margin-top:40px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
+                <h3 style="margin-bottom:16px;font-size:16px;">Credit Cost Reference</h3>
+                <div style="display:flex;flex-direction:column;gap:10px;" id="credit-costs-list"></div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────
+let currentUser = null;
+let globalConfig = {};
+let siteConfig = {};
+let currentBgFile = null;
+let points = [];
+let maskPoints = [];
+let isDrawingMask = false;
+let draggingType = null, draggingIdx = -1;
+let dragStartX = 0, dragStartY = 0, originalPoints = [];
+let imgNaturalWidth = 1, imgNaturalHeight = 1;
+let designW = 100, designH = 100;
+
+// ─── DOM ─────────────────────────────────────────────────
+const handles = ['pt-tl','pt-tr','pt-br','pt-bl'].map(id => document.getElementById(id));
+const edges = ['edge-top','edge-right','edge-bottom','edge-left'].map(id => document.getElementById(id));
+const polyVisible = document.getElementById('poly-visible');
+const polyClip = document.getElementById('poly-clip');
+const polyMask = document.getElementById('poly-mask');
+const maskPointsGroup = document.getElementById('mask-points-group');
+const workspace = document.getElementById('workspace');
+const tshirtImg = document.getElementById('tshirt-img');
+const designImg = document.getElementById('design-img');
+const svgOverlay = document.getElementById('svg-overlay');
+
+// ─── TOASTS ──────────────────────────────────────────────
+function showToast(msg, type='success', duration=4000) {
+    const c = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    const icon = type==='success'?'✅':type==='error'?'❌':'⚠️';
+    t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+    c.appendChild(t);
+    setTimeout(() => { t.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(()=>t.remove(), 300); }, duration);
+}
+
+// ─── LOADER ──────────────────────────────────────────────
+function showLoader(text='Processing...') {
+    document.getElementById('loader-text').innerText = text;
+    document.getElementById('loader').classList.add('open');
+}
+function hideLoader() { document.getElementById('loader').classList.remove('open'); }
+
+// ─── TABS ────────────────────────────────────────────────
+function switchTab(tab) {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === `tab-${tab}`));
+    const sidebar = document.getElementById('sidebar');
+    sidebar.style.display = tab === 'editor' ? 'flex' : 'none';
+    if (tab === 'gallery') loadGallery();
+    if (tab === 'pricing') loadPricing();
+    if (tab === 'dashboard') loadDashboard();
+}
+document.querySelectorAll('.nav-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+// ─── AUTH ─────────────────────────────────────────────────
+async function loadMe() {
+    const res = await fetch('/api/auth/me');
+    const data = await res.json();
+    currentUser = data.user;
+    updateUserUI();
+    if (!currentUser) showAuthModal();
+}
+function updateUserUI() {
+    if (!currentUser) return;
+    const av = document.getElementById('user-avatar-btn');
+    av.textContent = currentUser.name[0].toUpperCase();
+    document.getElementById('credit-count').textContent = currentUser.credits;
+    document.getElementById('dd-name').textContent = currentUser.name;
+    document.getElementById('dd-email').textContent = currentUser.email;
+    document.getElementById('stat-credits').textContent = currentUser.credits;
+    document.getElementById('stat-plan').textContent = currentUser.plan.toUpperCase();
+    document.getElementById('stat-plan').className = `badge badge-${currentUser.plan === 'business' ? 'teal' : currentUser.plan === 'pro' ? 'purple' : 'warning'}`;
+    document.getElementById('stat-generated').textContent = currentUser.total_generated || 0;
+    document.getElementById('welcome-msg').textContent = `Welcome back, ${currentUser.name}! 👋`;
+    if (currentUser.is_admin) document.getElementById('admin-link').style.display = 'flex';
+    const warn = document.getElementById('credit-warning');
+    warn.classList.toggle('show', currentUser.credits < 10);
+}
+function showAuthModal() { document.getElementById('auth-modal').classList.add('open'); }
+function toggleUserMenu() { document.getElementById('user-dropdown').classList.toggle('open'); }
+document.addEventListener('click', e => {
+    const dd = document.getElementById('user-dropdown');
+    const btn = document.getElementById('user-avatar-btn');
+    if (!dd.contains(e.target) && !btn.contains(e.target)) dd.classList.remove('open');
+});
+document.querySelectorAll('.modal-tab').forEach(t => {
+    t.addEventListener('click', () => {
+        document.querySelectorAll('.modal-tab').forEach(x => x.classList.toggle('active', x === t));
+        document.querySelectorAll('.modal-form').forEach(f => f.classList.toggle('active', f.id === `${t.dataset.authtab}-form`));
+    });
+});
+document.getElementById('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const res = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: document.getElementById('login-email').value, password: document.getElementById('login-password').value }) });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); return; }
+    currentUser = data.user;
+    document.getElementById('auth-modal').classList.remove('open');
+    updateUserUI(); showToast('Welcome back! 🎉');
+});
+document.getElementById('register-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const res = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: document.getElementById('reg-name').value, email: document.getElementById('reg-email').value, password: document.getElementById('reg-password').value }) });
+    const data = await res.json();
+    if (data.error) { showToast(data.error, 'error'); return; }
+    currentUser = data.user;
+    document.getElementById('auth-modal').classList.remove('open');
+    updateUserUI(); showToast(`Welcome! You got ${data.user.credits} free credits 🎉`);
+});
+async function doLogout() {
+    await fetch('/api/auth/logout', {method:'POST'});
+    currentUser = null; document.getElementById('user-dropdown').classList.remove('open');
+    showAuthModal();
+}
+
+// ─── SITE CONFIG & ADS ────────────────────────────────────
+async function loadSiteConfig() {
+    const res = await fetch('/api/site-config');
+    siteConfig = await res.json();
+    renderAds();
+}
+function renderAds() {
+    if (!currentUser || currentUser.plan === 'free') {
+        if (siteConfig.adsense_enabled && siteConfig.adsense_client_id) {
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.adsense_client_id}`;
+            script.crossOrigin = 'anonymous';
+            document.head.appendChild(script);
         }
-
-        async function loadConfig() {
-            const res = await fetch('/api/config');
-            globalConfig = await res.json();
+        if (siteConfig.sponsor_enabled && siteConfig.sponsor_banner_html) {
+            document.getElementById('sidebar-ad').innerHTML = siteConfig.sponsor_banner_html;
+            document.getElementById('dashboard-ad').innerHTML = siteConfig.sponsor_banner_html;
         }
+    }
+}
 
-        async function init() {
-            await loadConfig();
-            await loadBackgrounds();
-        }
+// ─── DASHBOARD ───────────────────────────────────────────
+async function loadDashboard() {
+    const res = await fetch('/api/gallery');
+    const files = await res.json();
+    document.getElementById('stat-output').textContent = files.length;
+}
 
-        function showLoader(text) {
-            loaderText.innerText = text;
-            loader.style.display = 'flex';
-        }
-        function hideLoader() {
-            loader.style.display = 'none';
-        }
-
-        function selectBackground(filename, liElement) {
-            document.querySelectorAll('.list-group li').forEach(li => li.classList.remove('selected'));
-            if(liElement) liElement.classList.add('selected');
-            
-            currentBgFile = filename;
-            currentBgTitle.innerText = "Düzenlenen: " + filename;
-            
-            tshirtImg.onload = () => {
-                imgNaturalWidth = tshirtImg.naturalWidth;
-                imgNaturalHeight = tshirtImg.naturalHeight;
-                tshirtImg.style.display = 'block';
-                svgOverlay.style.display = 'block';
-                handles.forEach(h => h.style.display = 'block');
-                
-                const rect = tshirtImg.getBoundingClientRect();
-                const scaleX = rect.width / imgNaturalWidth;
-                const scaleY = rect.height / imgNaturalHeight;
-
-                // Configden noktaları yükle veya varsayılan at
-                if (globalConfig[filename] && globalConfig[filename].points) {
-                    const cfgPoints = globalConfig[filename].points;
-                    points = cfgPoints.map(p => ({ x: p[0] * scaleX, y: p[1] * scaleY }));
-                    
-                    if (globalConfig[filename].mask_points) {
-                        maskPoints = globalConfig[filename].mask_points.map(p => ({ x: p[0] * scaleX, y: p[1] * scaleY }));
-                    } else {
-                        maskPoints = [];
-                    }
-                } else {
-                    const w = rect.width;
-                    const h = rect.height;
-                    points = [
-                        {x: w*0.3, y: h*0.3}, {x: w*0.7, y: h*0.3},
-                        {x: w*0.7, y: h*0.7}, {x: w*0.3, y: h*0.7}
-                    ];
-                    maskPoints = [];
-                }
-                
-                // Canvas için referans yükle (tasarımlar klasöründen canvas.png bulabilirsek veya ilk yüklenen)
-                // Şimdilik varsayılan boş bir placeholder veya seçili resim varsa onu kullan
-                updateUI();
-            };
-            tshirtImg.src = '/backgrounds/' + filename;
-        }
-
-        // Tasarım Değiştirme (Geçici Önizleme İçin)
-        document.getElementById('upload-design').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const url = URL.createObjectURL(file);
-                designImg.onload = () => {
-                    designW = designImg.naturalWidth;
-                    designH = designImg.naturalHeight;
-                    designImg.style.display = 'block';
-                    designImg.style.width = designW + 'px';
-                    designImg.style.height = designH + 'px';
-                    updateUI();
-                }
-                designImg.src = url;
-            }
-        });
-
-        // Toplu Tasarım Yükleme (Üretim İçin)
-        document.getElementById('upload-designs-bulk').addEventListener('change', async (e) => {
-            const files = e.target.files;
-            if (files.length > 0) {
-                showLoader("Tasarımlar Yükleniyor...");
-                for (let file of files) {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('type', 'design');
-                    await fetch('/api/upload', { method: 'POST', body: formData });
-                }
-                hideLoader();
-                alert(files.length + " tasarım başarıyla eklendi! Artık üretime geçebilirsiniz.");
-                e.target.value = ''; // Inputu sıfırla
-            }
-        });
-
-        // Arkaplan Yükleme
-        document.getElementById('upload-bg').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('type', 'background');
-                
-                showLoader("Yükleniyor...");
-                await fetch('/api/upload', { method: 'POST', body: formData });
-                await loadBackgrounds();
-                hideLoader();
-            }
-        });
-
-        // Yapay Zeka Arkaplan Temizleme
-        document.getElementById('upload-rembg').addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const formData = new FormData();
-                formData.append('file', file);
-                
-                showLoader("Yapay Zeka Arkaplanı Temizliyor...\n(İlk seferde AI modeli indireceği için uzun sürebilir)");
-                const res = await fetch('/api/remove-bg', { method: 'POST', body: formData });
-                const data = await res.json();
-                hideLoader();
-                
-                if (data.status === "success") {
-                    alert(data.filename + " olarak kaydedildi! Önizleme tasarımında seçebilirsiniz.");
-                } else {
-                    alert("Hata: " + data.error);
-                }
-            }
-        });
-
-        // Ayarları Kaydet
-        document.getElementById('btn-save').addEventListener('click', async () => {
-            if (!currentBgFile) return alert("Önce bir şablon seçin!");
-            
-            const scaleX = imgNaturalWidth / tshirtImg.width;
-            const scaleY = imgNaturalHeight / tshirtImg.height;
-
-            const realPoints = points.map(p => [Math.round(p.x * scaleX), Math.round(p.y * scaleY)]);
-            const realMaskPoints = maskPoints.map(p => [Math.round(p.x * scaleX), Math.round(p.y * scaleY)]);
-
-            const payload = {
-                [currentBgFile]: {
-                    "points": realPoints,
-                    "canvas_width": designW,
-                    "canvas_height": designH
-                }
-            };
-            if (realMaskPoints.length >= 3) {
-                payload[currentBgFile]["mask_points"] = realMaskPoints;
-            }
-
-            showLoader("Kaydediliyor...");
-            await fetch('/api/config', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            await loadConfig();
-            hideLoader();
-            alert("Ayarlar başarıyla kaydedildi!");
-        });
-
-        // Üretimi Başlat
-        document.getElementById('btn-generate').addEventListener('click', async () => {
-            showLoader("Mockuplar Üretiliyor...");
-            const res = await fetch('/api/generate', { method: 'POST' });
-            const data = await res.json();
-            hideLoader();
-            if(data.status === "success") {
-                alert("Üretim tamamlandı! Output klasörünü kontrol edin.\n\n" + data.output);
-            } else {
-                alert("Hata: " + data.message);
-            }
-        });
-
-        // --- Sürükle Bırak ve Çizim Mantığı ---
-        const btnDrawMask = document.getElementById('btn-draw-mask');
-        btnDrawMask.addEventListener('click', () => {
-            isDrawingMask = !isDrawingMask;
-            if (isDrawingMask) {
-                btnDrawMask.classList.add('active');
-                btnDrawMask.innerText = "Maske Çiziliyor... (Bitir)";
-                workspace.style.cursor = 'crosshair';
-                polyVisible.style.pointerEvents = 'none'; 
-                handles.forEach(h => h.style.pointerEvents = 'none');
-                edges.forEach(e => e.style.pointerEvents = 'none');
-            } else {
-                btnDrawMask.classList.remove('active');
-                btnDrawMask.innerText = "Manuel Kırpma Çiz";
-                workspace.style.cursor = 'default';
-                polyVisible.style.pointerEvents = 'fill';
-                handles.forEach(h => h.style.pointerEvents = 'auto');
-                edges.forEach(e => e.style.pointerEvents = 'fill');
-            }
-        });
-
-        document.getElementById('btn-clear-mask').addEventListener('click', () => {
+// ─── EDITOR ──────────────────────────────────────────────
+async function loadBackgrounds() {
+    const res = await fetch('/api/backgrounds');
+    const files = await res.json();
+    const list = document.getElementById('bg-list');
+    list.innerHTML = '';
+    files.forEach(file => {
+        const item = document.createElement('div');
+        item.className = 'file-item';
+        item.innerHTML = `<img class="file-thumb" src="/backgrounds/${encodeURIComponent(file)}" onerror="this.style.display='none'"><span class="file-name">${file}</span>`;
+        item.onclick = () => { document.querySelectorAll('.file-item').forEach(x=>x.classList.remove('selected')); item.classList.add('selected'); selectBackground(file); };
+        list.appendChild(item);
+    });
+}
+async function loadConfig() {
+    const res = await fetch('/api/config');
+    globalConfig = await res.json();
+}
+function selectBackground(filename) {
+    currentBgFile = filename;
+    document.getElementById('workspace-placeholder').style.display = 'none';
+    workspace.style.display = 'inline-block';
+    tshirtImg.onload = () => {
+        imgNaturalWidth = tshirtImg.naturalWidth;
+        imgNaturalHeight = tshirtImg.naturalHeight;
+        svgOverlay.style.display = 'block';
+        handles.forEach(h => h.style.display = 'block');
+        const rect = tshirtImg.getBoundingClientRect();
+        const sx = rect.width / imgNaturalWidth, sy = rect.height / imgNaturalHeight;
+        if (globalConfig[filename] && globalConfig[filename].points) {
+            points = globalConfig[filename].points.map(p => ({x: p[0]*sx, y: p[1]*sy}));
+            maskPoints = (globalConfig[filename].mask_points || []).map(p => ({x: p[0]*sx, y: p[1]*sy}));
+        } else {
+            const w = rect.width, h = rect.height;
+            points = [{x:w*.3,y:h*.3},{x:w*.7,y:h*.3},{x:w*.7,y:h*.7},{x:w*.3,y:h*.7}];
             maskPoints = [];
-            updateUI();
-        });
-
-        workspace.addEventListener('mousedown', (e) => {
-            if (isDrawingMask) {
-                const containerRect = workspace.getBoundingClientRect();
-                let nx = e.clientX - containerRect.left;
-                let ny = e.clientY - containerRect.top;
-                maskPoints.push({x: nx, y: ny});
-                updateUI();
-            }
-        });
-
-        handles.forEach((h, idx) => {
-            h.addEventListener('mousedown', (e) => {
-                if (isDrawingMask) return;
-                draggingType = 'point'; draggingIdx = idx; e.stopPropagation();
-            });
-        });
-
-        edges.forEach((edge, idx) => {
-            edge.addEventListener('mousedown', (e) => {
-                if (isDrawingMask) return;
-                draggingType = 'edge'; draggingIdx = idx; 
-                dragStartX = e.clientX; dragStartY = e.clientY;
-                originalPoints = points.map(p => ({...p})); e.stopPropagation();
-            });
-        });
-
-        polyVisible.addEventListener('mousedown', (e) => {
-            if (isDrawingMask) return;
-            draggingType = 'poly';
-            dragStartX = e.clientX; dragStartY = e.clientY;
-            originalPoints = points.map(p => ({...p})); e.stopPropagation();
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!draggingType) return;
-            const containerRect = workspace.getBoundingClientRect();
-            let nx = e.clientX - containerRect.left; let ny = e.clientY - containerRect.top;
-            
-            if (draggingType === 'point') {
-                points[draggingIdx].x = nx; points[draggingIdx].y = ny;
-            } else {
-                const dx = e.clientX - dragStartX; const dy = e.clientY - dragStartY;
-                let indices = draggingType === 'poly' ? [0,1,2,3] : 
-                    [[0,1], [1,2], [2,3], [3,0]][draggingIdx];
-                indices.forEach(i => {
-                    points[i].x = originalPoints[i].x + dx;
-                    points[i].y = originalPoints[i].y + dy;
-                });
-            }
-            updateUI();
-        });
-
-        document.addEventListener('mouseup', () => { draggingType = null; });
-
-        function solveLinearSystem(A, b) {
-            var n = A.length;
-            for (var i = 0; i < n; i++) A[i].push(b[i]);
-            for (var i = 0; i < n; i++) {
-                var maxEl = Math.abs(A[i][i]), maxRow = i;
-                for (var k = i + 1; k < n; k++) if (Math.abs(A[k][i]) > maxEl) { maxEl = Math.abs(A[k][i]); maxRow = k; }
-                for (var k = i; k < n + 1; k++) { var tmp = A[maxRow][k]; A[maxRow][k] = A[i][k]; A[i][k] = tmp; }
-                for (var k = i + 1; k < n; k++) {
-                    var c = -A[k][i] / A[i][i];
-                    for (var j = i; j < n + 1; j++) { if (i === j) A[k][j] = 0; else A[k][j] += c * A[i][j]; }
-                }
-            }
-            var x = new Array(n);
-            for (var i = n - 1; i >= 0; i--) {
-                x[i] = A[i][n] / A[i][i];
-                for (var k = i - 1; k >= 0; k--) A[k][n] -= A[k][i] * x[i];
-            }
-            return x;
         }
+        updateUI();
+    };
+    tshirtImg.src = `/backgrounds/${encodeURIComponent(filename)}`;
+}
 
-        function updateUI() {
-            handles.forEach((h, idx) => {
-                h.style.left = points[idx].x + 'px'; h.style.top = points[idx].y + 'px';
-            });
+// Warp math
+function solveLinearSystem(A, b) {
+    var n=A.length; for(var i=0;i<n;i++)A[i].push(b[i]);
+    for(var i=0;i<n;i++){var m=Math.abs(A[i][i]),r=i;for(var k=i+1;k<n;k++)if(Math.abs(A[k][i])>m){m=Math.abs(A[k][i]);r=k;}for(var k=i;k<n+1;k++){var t=A[r][k];A[r][k]=A[i][k];A[i][k]=t;}for(var k=i+1;k<n;k++){var c=-A[k][i]/A[i][i];for(var j=i;j<n+1;j++){if(i===j)A[k][j]=0;else A[k][j]+=c*A[i][j];}}}
+    var x=new Array(n);for(var i=n-1;i>=0;i--){x[i]=A[i][n]/A[i][i];for(var k=i-1;k>=0;k--)A[k][n]-=A[k][i]*x[i];}return x;
+}
+function updateUI() {
+    handles.forEach((h,i) => { h.style.left=points[i].x+'px'; h.style.top=points[i].y+'px'; });
+    const ps = points.map(p=>`${p.x},${p.y}`).join(' ');
+    polyVisible.setAttribute('points', ps);
+    if (maskPoints.length > 0) {
+        const ms = maskPoints.map(p=>`${p.x},${p.y}`).join(' ');
+        polyMask.setAttribute('points', ms);
+        polyClip.setAttribute('points', maskPoints.length>=3 ? ms : '-1000,-1000 10000,-1000 10000,10000 -1000,10000');
+    } else {
+        polyMask.setAttribute('points','');
+        polyClip.setAttribute('points','-1000,-1000 10000,-1000 10000,10000 -1000,10000');
+    }
+    maskPointsGroup.innerHTML='';
+    maskPoints.forEach(p => {
+        const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+        c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',5);c.setAttribute('class','mask-point');
+        maskPointsGroup.appendChild(c);
+    });
+    edges[0].setAttribute('x1',points[0].x);edges[0].setAttribute('y1',points[0].y);edges[0].setAttribute('x2',points[1].x);edges[0].setAttribute('y2',points[1].y);
+    edges[1].setAttribute('x1',points[1].x);edges[1].setAttribute('y1',points[1].y);edges[1].setAttribute('x2',points[2].x);edges[1].setAttribute('y2',points[2].y);
+    edges[2].setAttribute('x1',points[2].x);edges[2].setAttribute('y1',points[2].y);edges[2].setAttribute('x2',points[3].x);edges[2].setAttribute('y2',points[3].y);
+    edges[3].setAttribute('x1',points[3].x);edges[3].setAttribute('y1',points[3].y);edges[3].setAttribute('x2',points[0].x);edges[3].setAttribute('y2',points[0].y);
+    if (designImg.src && designImg.style.display!=='none' && designW>0) {
+        var src=[{x:0,y:0},{x:designW,y:0},{x:designW,y:designH},{x:0,y:designH}];
+        var a=[],b_=[];
+        for(var i=0;i<4;i++){a.push([src[i].x,src[i].y,1,0,0,0,-src[i].x*points[i].x,-src[i].y*points[i].x]);b_.push(points[i].x);a.push([0,0,0,src[i].x,src[i].y,1,-src[i].x*points[i].y,-src[i].y*points[i].y]);b_.push(points[i].y);}
+        var x=solveLinearSystem(a,b_);
+        designImg.style.transform=`matrix3d(${[x[0],x[3],0,x[6],x[1],x[4],0,x[7],0,0,1,0,x[2],x[5],0,1].join(',')})`;
+    }
+}
 
-            const ptsString = points.map(p => `${p.x},${p.y}`).join(' ');
-            polyVisible.setAttribute('points', ptsString);
-            
-            if (maskPoints.length > 0) {
-                const maskString = maskPoints.map(p => `${p.x},${p.y}`).join(' ');
-                polyMask.setAttribute('points', maskString);
-                polyClip.setAttribute('points', maskPoints.length >= 3 ? maskString : `-1000,-1000 10000,-1000 10000,10000 -1000,10000`);
-            } else {
-                polyMask.setAttribute('points', "");
-                polyClip.setAttribute('points', `-1000,-1000 10000,-1000 10000,10000 -1000,10000`); 
-            }
+// Drag logic
+handles.forEach((h,idx) => {
+    h.addEventListener('mousedown', e => { if(isDrawingMask)return; draggingType='point'; draggingIdx=idx; e.stopPropagation(); });
+});
+edges.forEach((edge,idx) => {
+    edge.addEventListener('mousedown', e => { if(isDrawingMask)return; draggingType='edge'; draggingIdx=idx; dragStartX=e.clientX; dragStartY=e.clientY; originalPoints=points.map(p=>({...p})); e.stopPropagation(); });
+});
+polyVisible.addEventListener('mousedown', e => { if(isDrawingMask)return; draggingType='poly'; dragStartX=e.clientX; dragStartY=e.clientY; originalPoints=points.map(p=>({...p})); e.stopPropagation(); });
+document.addEventListener('mousemove', e => {
+    if(!draggingType) return;
+    const r=workspace.getBoundingClientRect();
+    const nx=e.clientX-r.left, ny=e.clientY-r.top;
+    if(draggingType==='point'){ points[draggingIdx].x=nx; points[draggingIdx].y=ny; }
+    else { const dx=e.clientX-dragStartX, dy=e.clientY-dragStartY; const idxs=draggingType==='poly'?[0,1,2,3]:[[0,1],[1,2],[2,3],[3,0]][draggingIdx]; idxs.forEach(i=>{points[i].x=originalPoints[i].x+dx; points[i].y=originalPoints[i].y+dy;}); }
+    updateUI();
+});
+document.addEventListener('mouseup', () => { draggingType=null; });
 
-            maskPointsGroup.innerHTML = '';
-            maskPoints.forEach(p => {
-                const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                c.setAttribute('cx', p.x); c.setAttribute('cy', p.y); c.setAttribute('r', 5);
-                c.setAttribute('class', 'mask-point'); maskPointsGroup.appendChild(c);
-            });
+workspace.addEventListener('mousedown', e => {
+    if(!isDrawingMask) return;
+    const r=workspace.getBoundingClientRect();
+    maskPoints.push({x:e.clientX-r.left, y:e.clientY-r.top});
+    updateUI();
+});
 
-            edges[0].setAttribute('x1', points[0].x); edges[0].setAttribute('y1', points[0].y); edges[0].setAttribute('x2', points[1].x); edges[0].setAttribute('y2', points[1].y);
-            edges[1].setAttribute('x1', points[1].x); edges[1].setAttribute('y1', points[1].y); edges[1].setAttribute('x2', points[2].x); edges[1].setAttribute('y2', points[2].y);
-            edges[2].setAttribute('x1', points[2].x); edges[2].setAttribute('y1', points[2].y); edges[2].setAttribute('x2', points[3].x); edges[2].setAttribute('y2', points[3].y);
-            edges[3].setAttribute('x1', points[3].x); edges[3].setAttribute('y1', points[3].y); edges[3].setAttribute('x2', points[0].x); edges[3].setAttribute('y2', points[0].y);
+// Mask controls
+const btnDrawMask = document.getElementById('btn-draw-mask');
+btnDrawMask.addEventListener('click', () => {
+    isDrawingMask = !isDrawingMask;
+    if(isDrawingMask){
+        btnDrawMask.textContent='✅ Finish Mask';
+        btnDrawMask.className='btn btn-success btn-sm';
+        workspace.style.cursor='crosshair';
+        polyVisible.style.pointerEvents='none';
+        handles.forEach(h=>h.style.pointerEvents='none');
+        edges.forEach(e=>e.style.pointerEvents='none');
+    } else {
+        btnDrawMask.textContent='✂️ Draw Mask';
+        btnDrawMask.className='btn btn-danger btn-sm';
+        workspace.style.cursor='default';
+        polyVisible.style.pointerEvents='fill';
+        handles.forEach(h=>h.style.pointerEvents='auto');
+        edges.forEach(e=>e.style.pointerEvents='fill');
+    }
+});
+document.getElementById('btn-clear-mask').addEventListener('click', () => { maskPoints=[]; updateUI(); });
 
-            if (designImg.src && designImg.style.display !== 'none' && designW > 0) {
-                var src = [{x: 0, y: 0}, {x: designW, y: 0}, {x: designW, y: designH}, {x: 0, y: designH}];
-                var dst = points;
-                var a = [], b = [];
-                for (var i = 0; i < 4; i++) {
-                    a.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x]); b.push(dst[i].x);
-                    a.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y]); b.push(dst[i].y);
-                }
-                var x = solveLinearSystem(a, b);
-                var t = [x[0], x[3], 0, x[6], x[1], x[4], 0, x[7], 0, 0, 1, 0, x[2], x[5], 0, 1];
-                designImg.style.transform = `matrix3d(${t.join(',')})`;
-            }
+// Save settings
+document.getElementById('btn-save').addEventListener('click', async () => {
+    if(!currentBgFile){ showToast('Select a template first', 'warning'); return; }
+    const sx=imgNaturalWidth/tshirtImg.width, sy=imgNaturalHeight/tshirtImg.height;
+    const rp=points.map(p=>[Math.round(p.x*sx),Math.round(p.y*sy)]);
+    const rm=maskPoints.map(p=>[Math.round(p.x*sx),Math.round(p.y*sy)]);
+    const payload={[currentBgFile]:{"points":rp}};
+    if(rm.length>=3) payload[currentBgFile].mask_points=rm;
+    showLoader('Saving...');
+    await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    await loadConfig(); hideLoader(); showToast('Settings saved! ✅');
+});
+
+// Generate
+async function doGenerate() {
+    if (!currentUser){ showToast('Please sign in first', 'warning'); return; }
+    showLoader('Generating mockups... This may take a moment ⚡');
+    const res=await fetch('/api/generate',{method:'POST'});
+    const data=await res.json();
+    hideLoader();
+    if(data.status==='success'){
+        currentUser.credits -= (data.cost||0);
+        updateUserUI();
+        showToast(`Done! ${data.total||0} mockups created using ${data.cost||0} credits 🎉`);
+        loadDashboard();
+        // Show result ad for free users
+        if(currentUser.plan==='free') {
+            const adHtml = siteConfig.sponsor_banner_html || '';
+            if(adHtml) showToast('Sponsored: ' + adHtml.replace(/<[^>]+>/g,''), 'warning', 8000);
         }
+    } else {
+        showToast(data.message||'Generation failed', 'error');
+    }
+}
+document.getElementById('btn-generate').addEventListener('click', doGenerate);
+function quickGenerate() { switchTab('editor'); setTimeout(doGenerate, 100); }
 
-        init();
-    </script>
+// Design preview
+document.getElementById('upload-design').addEventListener('change', e => {
+    const file=e.target.files[0]; if(!file)return;
+    const url=URL.createObjectURL(file);
+    designImg.onload=()=>{ designW=designImg.naturalWidth; designH=designImg.naturalHeight; designImg.style.display='block'; designImg.style.width=designW+'px'; designImg.style.height=designH+'px'; updateUI(); };
+    designImg.src=url;
+});
+
+// Bulk design upload
+document.getElementById('upload-designs-bulk').addEventListener('change', async e => {
+    const files=e.target.files; if(!files.length)return;
+    showLoader(`Uploading ${files.length} design(s)...`);
+    for(const file of files){
+        const fd=new FormData(); fd.append('file',file); fd.append('type','design');
+        await fetch('/api/upload',{method:'POST',body:fd});
+    }
+    hideLoader(); showToast(`${files.length} design(s) uploaded! Ready to generate.`); e.target.value='';
+});
+
+// Upload background
+document.getElementById('upload-bg').addEventListener('change', async e => {
+    const file=e.target.files[0]; if(!file)return;
+    const fd=new FormData(); fd.append('file',file); fd.append('type','background');
+    showLoader('Uploading template...'); await fetch('/api/upload',{method:'POST',body:fd});
+    await loadBackgrounds(); hideLoader(); showToast('Template uploaded!');
+});
+
+// Remove BG
+document.getElementById('upload-rembg').addEventListener('change', async e => {
+    const file=e.target.files[0]; if(!file)return;
+    const fd=new FormData(); fd.append('file',file);
+    showLoader('AI is removing background... (first use may take 15-20s)');
+    const res=await fetch('/api/remove-bg',{method:'POST',body:fd});
+    const data=await res.json(); hideLoader();
+    if(data.status==='success'){ currentUser.credits-=2; updateUserUI(); showToast(`Background removed! Saved as ${data.filename}`); }
+    else showToast(data.error||'Failed', 'error');
+});
+
+// ─── GALLERY ─────────────────────────────────────────────
+async function loadGallery() {
+    const grid=document.getElementById('gallery-grid');
+    grid.innerHTML='<div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;text-align:center;padding:40px;">Loading...</div>';
+    const res=await fetch('/api/gallery');
+    const files=await res.json();
+    if(!files.length){ grid.innerHTML='<div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;text-align:center;padding:40px;">No mockups generated yet. Go to the Editor tab to get started!</div>'; return; }
+    grid.innerHTML='';
+    files.forEach(file => {
+        const item=document.createElement('div');
+        item.className='gallery-item';
+        item.innerHTML=`<img src="/output/${encodeURIComponent(file)}" alt="${file}" loading="lazy"><div class="overlay"><a href="/output/${encodeURIComponent(file)}" download="${file}" class="btn btn-primary btn-sm" style="width:auto;">⬇ Download</a></div>`;
+        grid.appendChild(item);
+    });
+}
+document.getElementById('refresh-gallery-btn').addEventListener('click', loadGallery);
+
+// ─── PRICING ─────────────────────────────────────────────
+function loadPricing() {
+    const plans=siteConfig.plans||{};
+    const grid=document.getElementById('pricing-grid');
+    grid.innerHTML='';
+    const planOrder=['free','pro','business'];
+    planOrder.forEach(key => {
+        const p=plans[key]; if(!p)return;
+        const isFeatured=key==='pro';
+        const isPro=key==='pro', isBiz=key==='business';
+        const features={
+            free:['20 credits on signup','1 credit per mockup','2 credits for AI BG removal','Basic templates'],
+            pro:['500 credits/month','All free features','Ad-free experience','Priority support'],
+            business:['Unlimited credits','All pro features','Commercial license','API access (coming soon)']
+        };
+        const card=document.createElement('div');
+        card.className=`pricing-card${isFeatured?' featured':''}`;
+        card.innerHTML=`
+            <div class="plan-name">${p.name}</div>
+            <div class="plan-price">${p.price===0?'Free':'$'+p.price}<span>${p.price>0?'/month':''}</span></div>
+            <div class="plan-credits">⚡ ${p.credits===9999?'Unlimited':p.credits+' credits'}</div>
+            <ul class="plan-features">${(features[key]||[]).map(f=>`<li>${f}</li>`).join('')}</ul>
+            <button class="btn ${isFeatured?'btn-primary':isBiz?'btn-success':'btn-ghost'}" onclick="showToast('Payment integration coming soon! 🚀','warning')">
+                ${p.price===0?'Current Plan':'Upgrade → $'+p.price+'/mo'}
+            </button>`;
+        grid.appendChild(card);
+    });
+
+    // Credit packages
+    const pkgGrid=document.getElementById('credit-packages-grid');
+    pkgGrid.innerHTML='';
+    (siteConfig.credit_packages||[]).forEach(pkg => {
+        const card=document.createElement('div');
+        card.className='card';
+        card.style.textAlign='center';
+        card.style.cursor='pointer';
+        card.innerHTML=`<div style="font-size:28px;font-weight:800;color:var(--purple-light)">⚡ ${pkg.credits}</div><div style="font-size:13px;color:var(--text-muted);margin:4px 0 16px;">credits</div><button class="btn btn-primary btn-sm" onclick="showToast('Payment integration coming soon! 🚀','warning')">$${pkg.price}</button>`;
+        pkgGrid.appendChild(card);
+    });
+
+    // Cost reference
+    const costList=document.getElementById('credit-costs-list');
+    const costs=siteConfig.credit_costs||{};
+    costList.innerHTML=[
+        {label:'Generate 1 mockup', key:'generate_single'},
+        {label:'Bulk generation (10+)', key:'generate_bulk'},
+        {label:'AI Background Removal', key:'remove_bg'}
+    ].map(r=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--text-secondary)">${r.label}</span><span class="badge badge-purple">⚡ ${costs[r.key]||'—'} credits</span></div>`).join('');
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+async function init() {
+    await loadSiteConfig();
+    await loadMe();
+    await loadConfig();
+    await loadBackgrounds();
+    loadDashboard();
+}
+init();
+</script>
 </body>
 </html>
