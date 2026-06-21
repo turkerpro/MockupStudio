@@ -48,12 +48,21 @@ def main():
                 canvas_h, canvas_w = c_img.shape[:2]
                 break
 
-    print(f"Toplam {len(tshirt_files)} tişört ve {len(tasarim_files)} tasarım bulundu.")
+    # Tasarımlardan canvas dosyasını çıkar, gerçek tasarımları belirle
+    real_tasarim_files = [f for f in tasarim_files if 'canvas' not in f.lower()]
+    # Config'de tanımlı tişörtleri filtrele (canvas.png hariç)
+    valid_tshirt_files = [f for f in tshirt_files if f in config and len(config[f].get('points', [])) == 4 and f.lower() != 'canvas.png']
+
+    total_mockups = len(valid_tshirt_files) * len(real_tasarim_files)
+
+    print(f"Toplam {len(valid_tshirt_files)} tişört ve {len(real_tasarim_files)} tasarım bulundu.")
     if canvas_w and canvas_h:
         print(f"Referans Canvas boyutu algılandı: {canvas_w}x{canvas_h}. Tüm tasarımlar bu orana göre sığdırılacak.")
+    print(f"TOTAL:{total_mockups}")
     print("Mockup üretim işlemi başlıyor...\n")
 
-    for t_file in tshirt_files:
+    done_count = 0
+    for t_file in valid_tshirt_files:
         t_path = os.path.join(tshirts_dir, t_file)
         
         # Tişört için config kontrolü
@@ -77,7 +86,7 @@ def main():
             
         tshirt_h, tshirt_w = tshirt_img.shape[:2]
 
-        for d_file in tasarim_files:
+        for d_file in real_tasarim_files:
             d_path = os.path.join(tasarim_dir, d_file)
             
             # Tasarımı RGBA (Alpha kanalı dahil) yükle
@@ -92,11 +101,16 @@ def main():
                 
             d_h, d_w = design_img.shape[:2]
 
-            # Eğer referans canvas varsa, tasarımı o boyutta şeffaf bir yüzeye sığdır
-            if canvas_w and canvas_h:
+            # Template spesifik canvas boyutu varsa öncelikli kullan
+            t_canvas_w = settings.get("canvas_width")
+            t_canvas_h = settings.get("canvas_height")
+            if t_canvas_w and t_canvas_h:
+                ref_w, ref_h = t_canvas_w, t_canvas_h
+            elif canvas_w and canvas_h:
                 ref_w, ref_h = canvas_w, canvas_h
             else:
-                ref_w, ref_h = d_w, d_h # Canvas yoksa kendi boyutunu kullan
+                ref_w, ref_h = d_w, d_h
+
                 
             # Orantılı ölçekleme (object-fit: contain)
             scale = min(ref_w / d_w, ref_h / d_h)
@@ -130,7 +144,7 @@ def main():
             # Multiply blend işlemi (NumPy ile hızlıca)
             # warped_design BGRA formatında. BGR (0,1,2) ve Alpha (3) kanallarını ayır
             warped_bgr = warped_design[:, :, :3]
-            alpha = warped_design[:, :, 3] / 255.0
+            alpha = (warped_design[:, :, 3] / 255.0) * 0.90
             
             # Özel kırpma maskesi (mask_points) varsa uygula
             mask_points = settings.get("mask_points")
@@ -142,19 +156,25 @@ def main():
             # Maskeyi 3 kanallı hale getir (RGB için)
             alpha_3d = np.expand_dims(alpha, axis=2)
             
-            # Multiply (Çoğalt) Modeli: (Tişört / 255) * (Tasarım / 255) * 255
             tshirt_float = tshirt_img.astype(float)
             design_float = warped_bgr.astype(float)
             
-            # Formül
-            multiplied = (tshirt_float * design_float) / 255.0
+            # --- Multiply Blend Hesaplaması (Katman 2) ---
+            base_norm = tshirt_float / 255.0
+            blend_norm = design_float / 255.0
             
-            # Alpha blending: Tasarımın şeffaf olmayan yerlerine multiply uygulanmış hali,
-            # Şeffaf olan yerlere ise tişörtün orijinal hali gelecek
-            result_float = (1.0 - alpha_3d) * tshirt_float + alpha_3d * multiplied
+            multiply_result = base_norm * blend_norm * 255.0
+            
+            # Katman 1 (Arka): Tişört %100 opacity -> tshirt_float
+            # Katman 2 (Orta): Tasarım %95 opacity (Multiply Blend)
+            mid_alpha = alpha_3d * 0.95
+            mid_layer = (1.0 - mid_alpha) * tshirt_float + mid_alpha * multiply_result
+            
+            # Katman 3 (Ön): Tişört %5 opacity
+            final_float = 0.95 * mid_layer + 0.05 * tshirt_float
             
             # 8-bit integer'a geri dönüştür
-            result_img = np.clip(result_float, 0, 255).astype(np.uint8)
+            result_img = np.clip(final_float, 0, 255).astype(np.uint8)
             
             # Çıktı dosya adını hazırla
             t_name = os.path.splitext(t_file)[0]
@@ -166,7 +186,9 @@ def main():
             is_success, im_buf_arr = cv2.imencode(".jpg", result_img, [int(cv2.IMWRITE_JPEG_QUALITY), 95])
             if is_success:
                 im_buf_arr.tofile(out_path)
-            print(f"Oluşturuldu: {out_filename}")
+            done_count += 1
+            print(f"PROGRESS:{done_count}:{total_mockups}")
+            import sys; sys.stdout.flush()
 
     print("\nIslem tamamlandi! Mockuplar 'output' klasorune kaydedildi.")
 

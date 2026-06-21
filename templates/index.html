@@ -1,1276 +1,426 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mockup Studio — Professional Mockup Generator</title>
-    <meta name="description" content="Create stunning mockups with AI-powered background removal and perspective warping. Upload your designs, generate mockups in seconds.">
+    <title>Mockup Studio — Editor</title>
+    <meta name="description" content="Professional mockup generator with AI-powered background removal.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            /* LIGHT MODE (Apple HIG) */
-            --bg-primary: #f5f5f7;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --bg-card-hover: #f0f0f0;
-            --border: rgba(0,0,0,0.1);
-            --border-active: rgba(0,122,255,0.5);
-            --purple: #007aff; /* Apple Blue */
-            --purple-light: #5e5ce6;
-            --purple-dark: #0056b3;
-            --teal: #34c759; /* Apple Green */
-            --teal-dark: #24a145;
-            --text-primary: #000000;
-            --text-secondary: rgba(0,0,0,0.55);
-            --text-muted: rgba(0,0,0,0.4);
-            --danger: #ff3b30;
-            --warning: #ff9500;
-            --success: #34c759;
-            --radius: 10px;
-            --radius-sm: 6px;
-            --shadow: 0 4px 24px rgba(0,0,0,0.06);
-            --shadow-purple: 0 4px 24px rgba(0,122,255,0.2);
-            --sidebar-w: 260px;
-            --navbar-h: 52px;
-            --nav-bg: rgba(255,255,255,0.85);
-            --sidebar-bg: rgba(242, 242, 247, 0.85);
-            --modal-bg: rgba(255,255,255,0.85);
-            --modal-overlay: rgba(0,0,0,0.2);
-        }
-
-        [data-theme="dark"] {
-            /* DARK MODE (Apple HIG) */
-            --bg-primary: #000000;
-            --bg-secondary: #1c1c1e;
-            --bg-card: #1c1c1e;
-            --bg-card-hover: #2c2c2e;
-            --border: rgba(255,255,255,0.15);
-            --border-active: rgba(10,132,255,0.5);
-            --purple: #0a84ff;
-            --purple-light: #5e5ce6;
-            --purple-dark: #005bb5;
-            --teal: #30d158;
-            --teal-dark: #24a145;
-            --text-primary: #ffffff;
-            --text-secondary: rgba(255,255,255,0.6);
-            --text-muted: rgba(255,255,255,0.4);
-            --danger: #ff453a;
-            --warning: #ff9f0a;
-            --success: #30d158;
-            --radius: 10px;
-            --radius-sm: 6px;
-            --shadow: 0 4px 24px rgba(0,0,0,0.5);
-            --shadow-purple: 0 4px 24px rgba(10,132,255,0.3);
-            --nav-bg: rgba(30, 30, 30, 0.85);
-            --sidebar-bg: rgba(40, 40, 43, 0.85);
-            --modal-bg: rgba(30, 30, 30, 0.85);
-            --modal-overlay: rgba(0,0,0,0.4);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow: hidden;
-            font-size: 13px;
-        }
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-
-        /* NAVBAR (macOS Toolbar style) */
-        .navbar {
-            position: fixed; top: 0; left: 0; right: 0; height: var(--navbar-h);
-            background: var(--nav-bg); backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 0.5px solid var(--border);
-            display: flex; align-items: center; padding: 0 16px; gap: 8px;
-            z-index: 1000; box-shadow: 0 1px 0 rgba(0,0,0,0.05);
-        }
-        .nav-brand { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); width: 244px; letter-spacing: -0.01em; }
-        .nav-tabs { display: flex; align-items: center; background: rgba(120,120,120,0.1); padding: 4px; border-radius: 8px; margin-left: 20px; }
-        .nav-tab {
-            padding: 4px 16px; border-radius: 6px; font-size: 12px; font-weight: 500;
-            color: var(--text-secondary); cursor: pointer; transition: all 0.2s; border: none; background: transparent; font-family: inherit;
-        }
-        .nav-tab:hover { color: var(--text-primary); }
-        .nav-tab.active { background: var(--bg-card); color: var(--text-primary); box-shadow: 0 1px 4px rgba(0,0,0,0.1); font-weight: 600; }
-        .navbar-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-
-        .credit-badge {
-            display: flex; align-items: center; gap: 6px;
-            background: rgba(124,58,237,0.15); border: 1px solid rgba(124,58,237,0.3);
-            border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 600;
-            color: var(--purple-light); cursor: pointer; transition: all 0.2s;
-        }
-        .credit-badge:hover { background: rgba(124,58,237,0.25); }
-        .credit-badge .icon { font-size: 14px; }
-        .user-avatar {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--purple), var(--teal));
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 700; font-size: 14px; cursor: pointer;
-            border: 2px solid transparent; transition: all 0.2s;
-        }
-        .user-avatar:hover { border-color: var(--purple-light); }
-
-        /* FLOATING TOOL PALETTE */
-        .sidebar {
-            position: absolute;
-            top: calc(var(--navbar-h) + 24px);
-            left: 24px;
-            width: var(--sidebar-w);
-            max-height: calc(100vh - var(--navbar-h) - 48px);
-            background: var(--sidebar-bg); backdrop-filter: saturate(180%) blur(20px);
-            border: 0.5px solid var(--border);
-            border-radius: 16px;
-            display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.05);
-            z-index: 50;
-        }
-        .sidebar-drag-handle {
-            height: 28px; background: transparent; cursor: grab;
-            display: flex; align-items: center; justify-content: center;
-            border-bottom: 0.5px solid rgba(0,0,0,0.05); flex-shrink: 0;
-        }
-        .sidebar-drag-handle::after {
-            content: ''; width: 36px; height: 4px; border-radius: 2px;
-            background: rgba(120,120,120,0.3);
-        }
-        .sidebar-drag-handle:active { cursor: grabbing; }
-        .sidebar-content { flex: 1; overflow-y: auto; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
-        .main-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; background: var(--bg-primary); }
-
-        /* TABS CONTENT */
-        .tab-content { display: none; height: 100%; overflow-y: auto; }
-        .tab-content.active { display: flex; flex-direction: column; }
-
-        /* CARDS / PANELS */
-        .card {
-            background: transparent; margin-bottom: 24px;
-        }
-        .card-title {
-            font-size: 11px; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 8px; padding-left: 8px;
-        }
-
-        /* BUTTONS */
-        .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 6px 12px; border-radius: var(--radius-sm); font-size: 13px;
-            font-weight: 500; cursor: pointer; border: none; font-family: inherit;
-            transition: all 0.2s; text-decoration: none; width: 100%;
-        }
-        .btn-primary {
-            background: var(--purple); color: white;
-        }
-        .btn-primary:hover { background: #0071e3; transform: scale(0.98); }
-        .btn-success { background: var(--success); color: white; }
-        .btn-success:hover { background: #28b84d; transform: scale(0.98); }
-        .btn-ghost {
-            background: rgba(255,255,255,0.1); color: var(--text-primary);
-        }
-        .btn-ghost:hover { background: var(--bg-card-hover); color: var(--text-primary); }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-danger:hover { background: #dc2626; }
-        .btn-sm { padding: 7px 12px; font-size: 12px; }
-        .btn-icon-only { width: 36px; height: 36px; padding: 0; }
-
-        /* FILE UPLOAD */
-        .upload-area {
-            background: var(--bg-card); border: 0.5px solid var(--border); border-radius: var(--radius-sm);
-            padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s;
-            position: relative; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .upload-area:hover { border-color: rgba(10,132,255,0.4); background: var(--bg-card-hover); }
-        .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-        .upload-area-icon { font-size: 20px; margin-bottom: 4px; }
-        .upload-area p { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
-        .upload-area span { color: var(--purple); font-weight: 500; }
-
-        /* FILE LIST */
-        .file-list { display: flex; flex-direction: column; gap: 2px; max-height: 180px; overflow-y: auto; padding: 0 4px; }
-        .file-item {
-            display: flex; align-items: center; gap: 8px; padding: 6px 8px;
-            border-radius: 6px; cursor: pointer; transition: background 0.1s;
-            border: none; font-size: 12px; color: var(--text-primary);
-        }
-        .file-item:hover { background: rgba(120,120,120,0.1); }
-        .file-item.selected { background: var(--purple); color: white; }
-        .file-item .file-thumb {
-            width: 24px; height: 24px; border-radius: 4px; object-fit: cover;
-            background: rgba(255,255,255,0.05); flex-shrink: 0; border: 0.5px solid rgba(0,0,0,0.1);
-        }
-        .file-item .file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
-        .file-item .del-btn {
-            width: 20px; height: 20px; border-radius: 4px; border: none; background: transparent;
-            color: inherit; opacity: 0.5; cursor: pointer; display: none; align-items: center;
-            justify-content: center; font-size: 12px; flex-shrink: 0;
-        }
-        .file-item:hover .del-btn { display: flex; }
-        .file-item .del-btn:hover { opacity: 1; background: rgba(0,0,0,0.2); }
-        .file-item.selected .del-btn:hover { background: rgba(255,255,255,0.2); }
-
-        /* EDITOR WORKSPACE */
-        .editor-layout { display: flex; height: calc(100vh - var(--navbar-h)); width: 100vw; position: relative; }
-        .editor-main {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; overflow: hidden;
-            background-color: var(--bg-primary);
-            background-image: radial-gradient(var(--border) 1px, transparent 0);
-            background-size: 24px 24px;
-            width: 100%; height: 100%;
-        }
-        .workspace-container {
-            position: relative; display: inline-block; user-select: none;
-            border-radius: 12px; overflow: visible;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 0 0 0.5px rgba(0,0,0,0.1);
-            max-width: 100%; max-height: calc(100vh - var(--navbar-h) - 80px);
-        }
-        #tshirt-img { display: block; max-width: 100%; max-height: calc(100vh - var(--navbar-h) - 80px); border-radius: 12px; pointer-events: none; }
-        #clip-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; clip-path: url(#my-clip); }
-        #design-img { position: absolute; top: 0; left: 0; transform-origin: 0 0; opacity: 0.9; pointer-events: none; display: none; }
-        #svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; overflow: visible; display: none; }
-        #poly-visible { fill: rgba(10,132,255,0.08); stroke: var(--purple); stroke-width: 1.5; stroke-dasharray: 4,4; cursor: move; pointer-events: fill; }
-        #poly-mask { fill: rgba(255,59,48,0.1); stroke: var(--danger); stroke-width: 1.5; pointer-events: none; }
-        .mask-point { fill: var(--danger); pointer-events: fill; cursor: pointer; }
-        .edge-line { stroke: transparent; stroke-width: 16; pointer-events: fill; }
-        .handle {
-            position: absolute; width: 14px; height: 14px;
-            background: #ffffff; border: 1.5px solid rgba(0,0,0,0.2);
-            border-radius: 50%; transform: translate(-50%,-50%); cursor: grab;
-            z-index: 20; display: none; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
-        }
-        .handle:hover { transform: translate(-50%,-50%) scale(1.2); }
-        .handle:active { cursor: grabbing; background: var(--purple); border-color: #ffffff; }
-        .workspace-placeholder {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            gap: 16px; padding: 60px; color: var(--text-secondary); text-align: center;
-            background: var(--bg-card); border-radius: 16px; border: 0.5px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05); max-width: 320px;
-        }
-        .workspace-placeholder .big-icon { font-size: 48px; margin-bottom: 8px; }
-        .workspace-placeholder h3 { font-size: 15px; font-weight: 600; color: var(--text-primary); }
-        .workspace-placeholder p { font-size: 13px; line-height: 1.5; }
-
-        /* DASHBOARD */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-        .stat-card {
-            background: var(--bg-card); border: 0.5px solid var(--border);
-            border-radius: 12px; padding: 20px; transition: all 0.2s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        }
-        .stat-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
-        .stat-card .stat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-        .stat-card .stat-value { font-size: 32px; font-weight: 800; }
-        .stat-card .stat-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
-        .stat-purple .stat-value { color: var(--purple-light); }
-        .stat-teal .stat-value { color: var(--teal); }
-        .stat-warning .stat-value { color: var(--warning); }
-
-        /* PRICING */
-        .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
-        .pricing-card {
-            background: var(--bg-card); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 24px; position: relative;
-            transition: all 0.2s;
-        }
-        .pricing-card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
-        .pricing-card.featured { border-color: var(--purple); background: rgba(124,58,237,0.08); }
-        .pricing-card.featured::before {
-            content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-            background: var(--purple); color: white; font-size: 10px; font-weight: 700;
-            padding: 3px 12px; border-radius: 20px; letter-spacing: 0.1em;
-        }
-        .plan-name { font-size: 14px; font-weight: 700; color: var(--text-secondary); margin-bottom: 8px; }
-        .plan-price { font-size: 36px; font-weight: 800; margin-bottom: 4px; }
-        .plan-price span { font-size: 14px; font-weight: 400; color: var(--text-muted); }
-        .plan-credits { font-size: 13px; color: var(--purple-light); margin-bottom: 20px; font-weight: 600; }
-        .plan-features { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
-        .plan-features li { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
-        .plan-features li::before { content: '✓'; color: var(--teal); font-weight: 700; }
-
-        /* GALLERY */
-        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-        .gallery-item { position: relative; border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 1; background: var(--bg-card); border: 1px solid var(--border); cursor: pointer; group: true; }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-        .gallery-item:hover img { transform: scale(1.05); }
-        .gallery-item .overlay {
-            position: absolute; inset: 0; background: rgba(0,0,0,0.6); opacity: 0;
-            display: flex; align-items: center; justify-content: center;
-            transition: opacity 0.2s;
-        }
-        .gallery-item:hover .overlay { opacity: 1; }
-
-        /* TOASTS */
-        .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-        .toast {
-            background: var(--bg-secondary); border: 1px solid var(--border);
-            border-radius: var(--radius-sm); padding: 14px 18px; font-size: 13px;
-            box-shadow: var(--shadow); display: flex; align-items: center; gap: 10px;
-            animation: slideIn 0.3s ease; max-width: 320px;
-        }
-        .toast.success { border-left: 3px solid var(--success); }
-        .toast.error { border-left: 3px solid var(--danger); }
-        .toast.warning { border-left: 3px solid var(--warning); }
-        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideOut { to { transform: translateX(120%); opacity: 0; } }
-
-        /* MODAL */
-        .modal-overlay {
-            position: fixed; inset: 0; background: var(--modal-overlay); backdrop-filter: blur(10px);
-            z-index: 9000; display: none; align-items: center; justify-content: center;
-        }
-        .modal-overlay.open { display: flex; }
-        .modal {
-            background: var(--modal-bg); backdrop-filter: saturate(180%) blur(40px); border: 0.5px solid var(--border);
-            border-radius: 18px; padding: 32px; width: 100%; max-width: 440px;
-            box-shadow: 0 24px 80px rgba(0,0,0,0.4);
-            animation: modalIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes modalIn { from { transform: scale(0.95) translateY(10px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
-        .modal h2 { font-size: 22px; font-weight: 800; margin-bottom: 8px; }
-        .modal p { color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; }
-        .modal-tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
-        .modal-tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-muted); border-bottom: 2px solid transparent; transition: all 0.2s; }
-        .modal-tab.active { color: var(--purple-light); border-color: var(--purple); }
-        .modal-form { display: none; flex-direction: column; gap: 14px; }
-        .modal-form.active { display: flex; }
-        .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); }
-        .form-input {
-            background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
-            padding: 11px 14px; font-size: 13px; color: var(--text-primary); font-family: inherit;
-            transition: border-color 0.2s; outline: none;
-        }
-        .form-input:focus { border-color: var(--purple); }
-        .form-divider { text-align: center; color: var(--text-muted); font-size: 12px; position: relative; }
-        .form-divider::before, .form-divider::after { content: ''; position: absolute; top: 50%; width: 40%; height: 1px; background: var(--border); }
-        .form-divider::before { left: 0; } .form-divider::after { right: 0; }
-
-        /* LOADER OVERLAY */
-        .loader-overlay {
-            position: fixed; inset: 0; background: rgba(10,10,15,0.85); backdrop-filter: blur(4px);
-            z-index: 9998; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 20px;
-        }
-        .loader-overlay.open { display: flex; }
-        .spinner { width: 48px; height: 48px; border: 3px solid rgba(124,58,237,0.2); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-text { font-size: 15px; color: var(--text-secondary); }
-
-        /* AD AREAS */
-        .ad-container { border-radius: var(--radius-sm); overflow: hidden; }
-        .ad-placeholder { background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 12px; text-align: center; font-size: 11px; color: var(--text-muted); }
-
-        /* BADGE */
-        .badge { display: inline-flex; align-items: center; padding: 3px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
-        .badge-purple { background: rgba(124,58,237,0.2); color: var(--purple-light); }
-        .badge-teal { background: rgba(6,214,160,0.15); color: var(--teal); }
-        .badge-warning { background: rgba(245,158,11,0.15); color: var(--warning); }
-
-        /* USER MENU */
-        .user-dropdown {
-            position: absolute; top: calc(var(--navbar-h) + 8px); right: 16px;
-            background: var(--bg-secondary); border: 1px solid var(--border);
-            border-radius: var(--radius); width: 220px; z-index: 1001;
-            box-shadow: var(--shadow); display: none; overflow: hidden;
-        }
-        .user-dropdown.open { display: block; }
-        .user-dropdown-header { padding: 16px; border-bottom: 1px solid var(--border); }
-        .user-dropdown-header .name { font-weight: 700; font-size: 14px; }
-        .user-dropdown-header .email { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-        .user-dropdown-item { padding: 10px 16px; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; color: var(--text-secondary); transition: all 0.15s; }
-        .user-dropdown-item:hover { background: var(--bg-card-hover); color: var(--text-primary); }
-        .user-dropdown-item.danger:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
-
-        /* PROGRESS BAR */
-        .progress-bar-container { background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; overflow: hidden; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--purple), var(--teal)); border-radius: 4px; transition: width 0.4s ease; width: 0%; }
-
-        /* CREDIT LOW WARNING */
-        .credit-warning {
-            background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
-            border-radius: var(--radius-sm); padding: 12px 16px; font-size: 13px;
-            color: var(--warning); display: none; align-items: center; gap: 10px; margin-bottom: 12px;
-        }
-        .credit-warning.show { display: flex; }
-
-        /* Section headers */
-        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .section-header h2 { font-size: 22px; font-weight: 800; }
-
-        /* Scrollable main areas */
-        .scrollable-page { padding: 28px; overflow-y: auto; height: 100%; }
-    </style>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body>
 
-<!-- NAVBAR -->
+<!-- ═══ NAVBAR ═══ -->
 <nav class="navbar">
     <a href="/" class="nav-brand">
-        <div class="nav-logo" style="font-size:16px;">🎨</div> Mockup Studio
+        <div class="nav-brand-icon">✦</div>
+        <span>Mockup Studio</span>
     </a>
     <div class="nav-tabs">
-        <button class="nav-tab active" data-tab="dashboard">Dashboard</button>
-        <button class="nav-tab" data-tab="editor">Editor</button>
-        <button class="nav-tab" data-tab="gallery">Gallery</button>
-        <button class="nav-tab" data-tab="pricing">Pricing</button>
+        <button class="nav-tab active" data-tab="dashboard">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Dashboard
+        </button>
+        <button class="nav-tab" data-tab="editor">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Editor
+        </button>
+        <button class="nav-tab" data-tab="gallery">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+            Gallery
+        </button>
+        <button class="nav-tab" data-tab="pricing">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Pricing
+        </button>
     </div>
-    <div class="navbar-right">
-        <button class="btn btn-ghost" id="theme-toggle" onclick="toggleTheme()" style="padding: 6px; width: auto; border:none; background:transparent; font-size:18px;">🌙</button>
-        <div class="credit-badge" id="credit-badge" onclick="switchTab('pricing')">
-            <span class="icon">⚡</span>
+    <div class="nav-right">
+        <button id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">☀️</button>
+        <div class="credit-badge" onclick="switchTab('pricing')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             <span id="credit-count">—</span> credits
         </div>
-        <button class="btn btn-primary" id="nav-login-btn" onclick="showAuthModal()" style="display:none; padding: 6px 14px; font-size: 13px; font-weight: 600; width: auto; margin-left: 10px;">Sign In</button>
+        <button class="btn btn-primary btn-sm" id="nav-login-btn" onclick="showAuthModal()" style="display:none;">Sign In</button>
         <div class="user-avatar" id="user-avatar-btn" onclick="toggleUserMenu()" style="display:none;">?</div>
     </div>
 </nav>
 
-<!-- USER DROPDOWN -->
+<!-- ═══ USER DROPDOWN ═══ -->
 <div class="user-dropdown" id="user-dropdown">
-    <div class="user-dropdown-header">
-        <div class="name" id="dd-name">—</div>
-        <div class="email" id="dd-email">—</div>
+    <div class="dd-header">
+        <div class="dd-name" id="dd-name">—</div>
+        <div class="dd-email" id="dd-email">—</div>
     </div>
-    <div class="user-dropdown-item" onclick="switchTab('pricing')">⚡ Buy Credits</div>
-    <div class="user-dropdown-item" id="admin-link" style="display:none;" onclick="window.open('/admin','_blank')">🛠️ Admin Panel</div>
-    <div class="user-dropdown-item danger" id="logout-btn" onclick="doLogout()">↩ Sign Out</div>
+    <div class="dd-item" onclick="switchTab('pricing')">⚡ Buy Credits</div>
+    <div class="dd-item" id="admin-link" style="display:none;" onclick="window.open('/admin','_blank')">🛠 Admin</div>
+    <div class="dd-item danger" id="logout-btn" onclick="doLogout()">↩ Sign Out</div>
 </div>
 
-<!-- AUTH MODAL -->
+<!-- ═══ AUTH MODAL ═══ -->
 <div class="modal-overlay" id="auth-modal">
-    <div class="modal" style="position:relative;">
-        <button onclick="hideAuthModal()" style="position:absolute; top: 16px; right: 16px; background:none; border:none; font-size:20px; cursor:pointer; color:var(--text2); padding:4px;">✕</button>
-        <h2>Welcome back 👋</h2>
-        <p>Sign in or create an account to start generating mockups</p>
+    <div class="modal">
+        <button class="modal-close" onclick="hideAuthModal()">✕</button>
+        <h2>Welcome back</h2>
+        <p>Sign in or create an account to continue</p>
         <div class="modal-tabs">
             <div class="modal-tab active" data-authtab="login">Sign In</div>
             <div class="modal-tab" data-authtab="register">Create Account</div>
         </div>
         <form class="modal-form active" id="login-form">
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input class="form-input" type="email" id="login-email" placeholder="you@example.com" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <input class="form-input" type="password" id="login-password" placeholder="••••••••" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Sign In →</button>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="login-email" placeholder="you@example.com" required></div>
+            <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="login-password" placeholder="Min 6 chars" required></div>
+            <button type="submit" class="btn btn-accent" style="width:100%">Sign In</button>
         </form>
         <form class="modal-form" id="register-form">
-            <div class="form-group">
-                <label class="form-label">Full Name</label>
-                <input class="form-input" type="text" id="reg-name" placeholder="John Doe" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <input class="form-input" type="email" id="reg-email" placeholder="you@example.com" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Password</label>
-                <input class="form-input" type="password" id="reg-password" placeholder="Min. 6 characters" required>
-            </div>
-            <button type="submit" class="btn btn-primary">Create Account & Get 20 Free Credits →</button>
+            <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" type="text" id="reg-name" placeholder="John Doe" required></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" id="reg-email" placeholder="you@example.com" required></div>
+            <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" id="reg-password" placeholder="Min. 6 characters" required></div>
+            <button type="submit" class="btn btn-accent" style="width:100%">Create Account — Get 20 Free Credits</button>
         </form>
     </div>
 </div>
 
-<!-- LOADER -->
+<!-- ═══ GENERATION OVERLAY ═══ -->
+<div class="gen-overlay" id="gen-overlay">
+    <div class="gen-modal">
+        <span class="gen-emoji" id="gen-emoji">⚡</span>
+        <div class="gen-pct" id="gen-pct">0%</div>
+        <div class="gen-label" id="gen-label">Preparing generation…</div>
+        <div class="gen-track"><div class="gen-bar" id="gen-bar"></div></div>
+        <div class="gen-meta">
+            <span id="gen-count">0 / 0 mockups</span>
+            <span id="gen-eta">—</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ LOADER ═══ -->
 <div class="loader-overlay" id="loader">
     <div class="spinner"></div>
-    <div class="loader-text" id="loader-text">Processing...</div>
+    <div class="loader-text" id="loader-text">Processing…</div>
 </div>
 
-<!-- TOAST CONTAINER -->
+<!-- ═══ TOAST ═══ -->
 <div class="toast-container" id="toast-container"></div>
 
-<!-- APP LAYOUT -->
-<div class="app-layout" style="display:flex; height:100vh; padding-top:var(--navbar-h);">
-    
-    <!-- MAIN -->
-    <main class="main-area" style="flex:1; display:flex; flex-direction:column;">
+<!-- ═══ APP SHELL ═══ -->
+<div class="app">
+<main class="main">
 
-        <!-- DASHBOARD TAB -->
-        <div class="tab-content active scrollable-page" id="tab-dashboard" style="padding:24px 20px;">
-            <div style="max-width:800px; margin:0 auto; width:100%;">
-            <!-- HEADER ROW -->
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-                <div>
-                    <div id="welcome-msg" style="font-size:15px;font-weight:700;">Welcome back! 👋</div>
-                    <div style="color:var(--text-secondary);font-size:12px;margin-top:2px;">Mockup Studio overview</div>
+    <!-- ─── DASHBOARD TAB ─── -->
+    <div class="tab-content active" id="tab-dashboard">
+        <div class="tab-scroll">
+            <div class="dashboard-container">
+                <div class="dash-header">
+                    <div>
+                        <div id="welcome-msg" class="dash-title">Welcome to Mockup Studio</div>
+                        <div class="dash-subtitle">Overview of your workspace</div>
+                    </div>
+                    <button class="btn btn-accent btn-sm" onclick="switchTab('editor')">
+                        Open Editor
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </button>
                 </div>
-                <button class="btn btn-primary btn-sm" style="width:auto;" onclick="switchTab('editor')">🎨 Editor</button>
-            </div>
 
-            <!-- STAT CARDS -->
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
-                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Credits</div>
-                    <div style="font-size:22px;font-weight:800;color:var(--purple-light);" id="stat-credits">—</div>
-                    <div style="margin-top:3px;"><span id="stat-plan" class="badge badge-purple" style="font-size:10px;">—</span></div>
+                <div class="dash-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon purple">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Credits</div>
+                            <div class="stat-value" id="stat-credits">—</div>
+                        </div>
+                        <span id="stat-plan" class="badge badge-purple">—</span>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Generated</div>
+                            <div class="stat-value" id="stat-generated">0</div>
+                        </div>
+                        <span class="badge badge-green">total</span>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon amber">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-label">Output Files</div>
+                            <div class="stat-value" id="stat-output">0</div>
+                        </div>
+                        <span class="badge badge-amber">ready</span>
+                    </div>
                 </div>
-                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Generated</div>
-                    <div style="font-size:22px;font-weight:800;color:var(--teal);" id="stat-generated">0</div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">total mockups</div>
-                </div>
-                <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
-                    <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Output Files</div>
-                    <div style="font-size:22px;font-weight:800;color:var(--warning);" id="stat-output">0</div>
-                    <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">ready to download</div>
-                </div>
-            </div>
 
-            <!-- QUICK ACTIONS -->
-            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:8px;">Quick Actions</div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">
-                <div class="card" style="cursor:pointer;text-align:center;padding:14px 10px;" onclick="switchTab('editor')">
-                    <div style="font-size:20px;margin-bottom:5px;">🎨</div>
-                    <div style="font-weight:700;font-size:12px;">Editor</div>
+                <div class="section-label">Quick Actions</div>
+                <div class="quick-actions">
+                    <div class="action-card" onclick="switchTab('editor')">
+                        <div class="action-icon">🎨</div>
+                        <div class="action-title">Editor</div>
+                        <div class="action-desc">Open the workspace</div>
+                    </div>
+                    <div class="action-card" onclick="switchTab('editor');setTimeout(doGenerate,200)">
+                        <div class="action-icon">⚡</div>
+                        <div class="action-title">Generate</div>
+                        <div class="action-desc">Bulk create mockups</div>
+                    </div>
+                    <div class="action-card" onclick="switchTab('gallery')">
+                        <div class="action-icon">🖼</div>
+                        <div class="action-title">Gallery</div>
+                        <div class="action-desc">View output files</div>
+                    </div>
                 </div>
-                <div class="card" style="cursor:pointer;text-align:center;padding:14px 10px;" onclick="quickGenerate()">
-                    <div style="font-size:20px;margin-bottom:5px;">⚡</div>
-                    <div style="font-weight:700;font-size:12px;">Generate</div>
-                </div>
-                <div class="card" style="cursor:pointer;text-align:center;padding:14px 10px;" onclick="switchTab('gallery')">
-                    <div style="font-size:20px;margin-bottom:5px;">🖼️</div>
-                    <div style="font-weight:700;font-size:12px;">Gallery</div>
-                </div>
-            </div>
 
-            <!-- AD -->
-            <div class="ad-container" id="dashboard-ad"></div>
+                <div class="ad-container" id="dashboard-ad"></div>
             </div>
         </div>
+    </div>
 
-        <!-- EDITOR TAB -->
-        <div class="tab-content" id="tab-editor" style="position:relative;">
-            
-            <!-- FLOATING SIDEBAR (Editor only) -->
-            <aside class="sidebar" id="sidebar" style="display:none;">
-                <div class="sidebar-drag-handle" id="sidebar-drag"></div>
-                <div class="sidebar-content">
-        
+    <!-- ─── EDITOR TAB ─── -->
+    <div class="tab-content" id="tab-editor">
+        <div class="editor-grid">
+            <!-- LEFT PANEL -->
+            <aside class="editor-panel">
+                <div class="panel-section">
                     <div class="credit-warning" id="credit-warning">
-                        ⚠️ Low credits! <a href="#" onclick="switchTab('pricing')" style="color:var(--warning);font-weight:600;">Top up →</a>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        Low credits — <a href="#" onclick="switchTab('pricing')">Top up →</a>
                     </div>
-        
-                    <!-- TEMPLATES -->
-                    <div class="card">
-                        <div class="card-title">Background Templates</div>
-                        <div class="file-list" id="bg-list"></div>
-                        <div style="margin-top:10px;">
-                            <div class="upload-area">
-                                <input type="file" id="upload-bg" accept="image/*">
-                                <div class="upload-area-icon">🖼️</div>
-                                <p><span>Upload</span> new template</p>
-                            </div>
-                        </div>
-                    </div>
-        
-                    <!-- DESIGNS -->
-                    <div class="card">
-                        <div class="card-title">Designs (Bulk Upload)</div>
-                        <div class="file-list" id="design-list" style="margin-bottom:10px;"></div>
-                        <div class="upload-area">
-                            <input type="file" id="upload-designs-bulk" accept="image/*" multiple>
-                            <div class="upload-area-icon">🎨</div>
-                            <p><span>Upload</span> designs for production</p>
-                        </div>
-                    </div>
-        
-                    <!-- CONTROLS -->
-                    <div class="card">
-                        <div class="card-title">Warp Controls</div>
-                        <button class="btn btn-danger btn-sm" id="btn-draw-mask" style="margin-bottom:8px;">✂️ Draw Mask</button>
-                        <button class="btn btn-ghost btn-sm" id="btn-clear-mask">🗑️ Clear Mask</button>
-                        <div style="margin-top:10px;">
-                            <div class="upload-area">
-                                <input type="file" id="upload-design" accept="image/*">
-                                <div class="upload-area-icon">👁️</div>
-                                <p><span>Preview</span> a design</p>
-                            </div>
-                        </div>
-                    </div>
-        
-                    <!-- AI TOOLS -->
-                    <div class="card">
-                        <div class="card-title">AI Tools — 2 credits</div>
-                        <div class="upload-area">
-                            <input type="file" id="upload-rembg" accept="image/*">
-                            <div class="upload-area-icon">🤖</div>
-                            <p><span>Upload & Remove</span> BG</p>
-                        </div>
-                        <button class="btn btn-primary" id="btn-rembg-current" style="margin-top:8px; width: 100%;">🪄 Remove BG of Active Design</button>
-                    </div>
-        
-                    <!-- SAVE & GENERATE -->
-                    <button class="btn btn-ghost" id="btn-save" style="margin-bottom:8px;">💾 Save Settings</button>
-                    <button class="btn btn-success" id="btn-generate" style="flex-direction:column; padding:12px;">
-                        <span>⚡ Generate All Mockups</span>
-                        <span id="generate-cost-label" style="font-size:10px; font-weight:600; opacity:0.9; margin-top:4px;">Cost: 0 credits</span>
-                    </button>
-        
-                    <!-- AD SLOT (sidebar) -->
-                    <div class="ad-container" id="sidebar-ad"></div>
                 </div>
+
+                <!-- Templates -->
+                <div class="panel-section">
+                    <div class="panel-label">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+                        Templates
+                    </div>
+                    <div class="file-list" id="bg-list"></div>
+                    <div class="upload-area">
+                        <input type="file" id="upload-bg" accept="image/*">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                        <p><span>Upload</span> new template</p>
+                    </div>
+                </div>
+
+                <!-- Designs -->
+                <div class="panel-section">
+                    <div class="panel-label">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                        Designs
+                    </div>
+                    <div class="file-list" id="design-list"></div>
+                    <div class="upload-area">
+                        <input type="file" id="upload-designs-bulk" accept="image/*" multiple>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <p><span>Upload</span> designs (bulk)</p>
+                    </div>
+                </div>
+
+                <!-- Preview -->
+                <div class="panel-section">
+                    <div class="panel-label">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Preview
+                    </div>
+                    <div class="upload-area">
+                        <input type="file" id="upload-design" accept="image/*">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <p><span>Preview</span> design on canvas</p>
+                    </div>
+                </div>
+
+                <!-- AI Tools -->
+                <div class="panel-section">
+                    <div class="panel-label">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-2 4-4 4s-4-2.05-4-4a4 4 0 0 1 4-4z"/><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M4 21v-2a4 4 0 0 1 3-3.87"/></svg>
+                        AI Tools <span class="badge badge-purple" style="margin-left:6px;">2 credits</span>
+                    </div>
+                    <div class="upload-area" style="margin-bottom:8px;">
+                        <input type="file" id="upload-rembg" accept="image/*">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        <p><span>Upload & Remove</span> background</p>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" id="btn-rembg-current" style="width:100%;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        Remove BG of Active Design
+                    </button>
+                </div>
+
+                <!-- Template Settings -->
+                <div class="panel-section" id="template-settings-section" style="display:none;">
+                    <div class="panel-label">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><circle cx="17" cy="17" r="4"/></svg>
+                        Template Settings
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" style="font-size:11px;">Category & Ratio</label>
+                            <select class="form-input" id="template-category" style="padding:6px;font-size:12px;background:var(--bg-tertiary);border:1px solid var(--border);border-radius:6px;width:100%;color:var(--text1);">
+                                <option value="custom">Custom (Free Ratio)</option>
+                                <option value="tshirt" data-w="1750" data-h="2000">👕 T-Shirt (14" x 16" - 7:8)</option>
+                                <option value="hoodie" data-w="1500" data-h="2000">🧥 Hoodie (12" x 16" - 3:4)</option>
+                                <option value="mug" data-w="1000" data-h="1000">☕ Mug (1:1)</option>
+                                <option value="mug_full" data-w="2400" data-h="1000">☕ Mug Wrap (12:5)</option>
+                                <option value="poster" data-w="2000" data-h="3000">🖼 Poster (2:3)</option>
+                                <option value="totebag" data-w="1500" data-h="1500">🛍 Totebag (1:1)</option>
+                                <option value="phone" data-w="1000" data-h="2000">📱 Phone Case (1:2)</option>
+                            </select>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                            <div>
+                                <label class="form-label" style="font-size:10px;">Width (px)</label>
+                                <input type="number" id="template-width" class="form-input" style="padding:6px;font-size:12px;" value="1750">
+                            </div>
+                            <div>
+                                <label class="form-label" style="font-size:10px;">Height (px)</label>
+                                <input type="number" id="template-height" class="form-input" style="padding:6px;font-size:12px;" value="2000">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top:4px;margin-bottom:0;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                <label class="form-label" style="font-size:11px;margin-bottom:0;">Design Scale</label>
+                                <span id="scale-value" style="font-size:11px;color:var(--accent);font-family:var(--font-mono);font-weight:600;">100%</span>
+                            </div>
+                            <input type="range" id="design-scale-slider" min="10" max="200" value="100" style="width:100%;accent-color:var(--accent);cursor:pointer;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warp Controls -->
+                <div class="panel-section">
+                    <div class="panel-label">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+                        Warp Controls
+                    </div>
+                    <div class="warp-controls">
+                        <button class="btn btn-danger btn-sm" id="btn-draw-mask">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="18" r="3"/><line x1="6" y1="9" x2="6" y2="15"/><line x1="9" y1="18" x2="15" y2="18"/></svg>
+                            Draw Mask
+                        </button>
+                        <button class="btn btn-ghost btn-sm" id="btn-clear-mask">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            Clear Mask
+                        </button>
+                        <button class="btn btn-accent btn-sm" id="btn-save">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section"><div class="ad-container" id="sidebar-ad"></div></div>
             </aside>
 
-            <div class="editor-layout">
-                <div class="editor-main">
-                    <div id="workspace-placeholder" class="workspace-placeholder">
-                        <div class="big-icon">🎨</div>
-                        <h3>No template selected</h3>
-                        <p>Choose a background template from the left panel to start setting up warp points and masks</p>
+            <!-- WORKSPACE -->
+            <div class="editor-workspace">
+                <!-- Zoom Controls -->
+                <div class="zoom-controls" id="zoom-controls">
+                    <button onclick="zoomOut()" title="Zoom Out">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
+                    <div id="zoom-level">100%</div>
+                    <button onclick="zoomIn()" title="Zoom In">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </button>
+                    <div class="zoom-divider"></div>
+                    <button onclick="resetZoom()" title="Reset Zoom">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h6v6"/><path d="M9 21H3v-6"/><path d="M21 3l-7 7"/><path d="M3 21l7-7"/></svg>
+                    </button>
+                </div>
+
+                <!-- Placeholder -->
+                <div id="workspace-placeholder" class="workspace-placeholder">
+                    <div class="ph-icon-wrap">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
                     </div>
-                    <div class="workspace-container" id="workspace" style="display:none;">
-                        <img id="tshirt-img" src="" alt="">
-                        <svg width="0" height="0" style="position:absolute;">
-                            <defs><clipPath id="my-clip"><polygon id="poly-clip" points="0,0 0,0 0,0 0,0"/></clipPath></defs>
-                        </svg>
-                        <div id="clip-container"><img id="design-img" src="" alt=""></div>
-                        <svg id="svg-overlay">
-                            <polygon id="poly-mask" points=""/>
-                            <g id="mask-points-group"></g>
-                            <polygon id="poly-visible" points="0,0 0,0 0,0 0,0"/>
-                            <line id="edge-top" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
-                            <line id="edge-right" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
-                            <line id="edge-bottom" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
-                            <line id="edge-left" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
-                        </svg>
-                        <div class="handle" id="pt-tl"></div>
-                        <div class="handle" id="pt-tr"></div>
-                        <div class="handle" id="pt-br"></div>
-                        <div class="handle" id="pt-bl"></div>
+                    <h3>No template selected</h3>
+                    <p>Choose a background from the left panel to start placing your design</p>
+                    <div class="ph-tip">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        Shift+Drag to pan · Scroll to zoom
                     </div>
+                </div>
+
+                <!-- Canvas -->
+                <div class="workspace-container" id="workspace" style="display:none;">
+                    <img id="tshirt-img" src="" alt="">
+                    <svg width="0" height="0" style="position:absolute;"><defs><clipPath id="my-clip"><polygon id="poly-clip" points="0,0 0,0 0,0 0,0"/></clipPath></defs></svg>
+                    <div id="clip-container"><img id="design-img" src="" alt=""></div>
+                    <img id="tshirt-img-front" src="" alt="">
+                    <svg id="svg-overlay">
+                        <polygon id="poly-mask" points=""/>
+                        <g id="mask-points-group"></g>
+                        <polygon id="poly-visible" points="0,0 0,0 0,0 0,0"/>
+                        <line id="edge-top" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
+                        <line id="edge-right" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
+                        <line id="edge-bottom" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
+                        <line id="edge-left" class="edge-line" x1="0" y1="0" x2="0" y2="0"/>
+                    </svg>
+                    <div class="handle" id="pt-tl"></div>
+                    <div class="handle" id="pt-tr"></div>
+                    <div class="handle" id="pt-br"></div>
+                    <div class="handle" id="pt-bl"></div>
                 </div>
             </div>
-        </div>
 
-        <!-- GALLERY TAB -->
-        <div class="tab-content scrollable-page" id="tab-gallery">
-            <div class="section-header">
+            <!-- BOTTOM BAR -->
+            <div class="editor-actions">
+                <div class="action-info" id="generate-cost-label">Upload templates and designs to generate</div>
+                <div style="flex:1;"></div>
+                <button class="btn btn-generate" id="btn-generate">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Generate All Mockups
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── GALLERY TAB ─── -->
+    <div class="tab-content" id="tab-gallery">
+        <div class="tab-scroll">
+            <div class="gallery-header">
                 <div>
-                    <h2>Gallery</h2>
-                    <p style="color:var(--text-secondary);font-size:13px;margin-top:4px;">All your generated mockups</p>
+                    <h2 class="dash-title">Gallery</h2>
+                    <p class="dash-subtitle">All your generated mockups</p>
                 </div>
-                <button class="btn btn-ghost" style="width:auto;" id="refresh-gallery-btn">🔄 Refresh</button>
+                <button class="btn btn-ghost btn-sm" id="refresh-gallery-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                    Refresh
+                </button>
             </div>
             <div class="gallery-grid" id="gallery-grid">
-                <div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;text-align:center;padding:40px;">
-                    Loading gallery...
+                <div class="gallery-empty">Loading…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── PRICING TAB ─── -->
+    <div class="tab-content" id="tab-pricing">
+        <div class="tab-scroll">
+            <div class="pricing-container">
+                <h2 class="dash-title">Plans and Credits</h2>
+                <p class="dash-subtitle">Choose the right plan for your workflow</p>
+                <div class="pricing-grid" id="pricing-grid"></div>
+                <div style="margin-top:40px;">
+                    <h3 class="section-label">Credit Packages</h3>
+                    <div class="packages-grid" id="credit-packages-grid"></div>
+                </div>
+                <div class="card" style="margin-top:32px;padding:24px;">
+                    <div class="section-label" style="margin-bottom:16px;">Cost Reference</div>
+                    <div id="credit-costs-list"></div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- PRICING TAB -->
-        <div class="tab-content scrollable-page" id="tab-pricing">
-            <div class="section-header">
-                <div>
-                    <h2>Plans & Credits</h2>
-                    <p style="color:var(--text-secondary);font-size:13px;margin-top:4px;">Choose the right plan for your workflow</p>
-                </div>
-            </div>
-
-            <div class="pricing-grid" id="pricing-grid"></div>
-
-            <div style="margin-top:40px;">
-                <h2 style="font-size:18px;margin-bottom:20px;">Credit Packages (Top Up)</h2>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;" id="credit-packages-grid"></div>
-            </div>
-
-            <div style="margin-top:40px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
-                <h3 style="margin-bottom:16px;font-size:16px;">Credit Cost Reference</h3>
-                <div style="display:flex;flex-direction:column;gap:10px;" id="credit-costs-list"></div>
-            </div>
-        </div>
-
-    </main>
+</main>
 </div>
 
-<script>
-// ─── THEME ───────────────────────────────────────────────
-const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-document.documentElement.setAttribute('data-theme', savedTheme);
-window.addEventListener('DOMContentLoaded', () => {
-    const btn = document.getElementById('theme-toggle');
-    if(btn) btn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-});
-function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-    const btn = document.getElementById('theme-toggle');
-    if(btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
-}
-
-// ─── FLOATING SIDEBAR ────────────────────────────────────
-const sidebar = document.getElementById('sidebar');
-const dragHandle = document.getElementById('sidebar-drag');
-let isDraggingPanel = false;
-let panelOffsetX = 0, panelOffsetY = 0;
-
-dragHandle.addEventListener('mousedown', (e) => {
-    isDraggingPanel = true;
-    const rect = sidebar.getBoundingClientRect();
-    panelOffsetX = e.clientX - rect.left;
-    panelOffsetY = e.clientY - rect.top;
-    sidebar.style.transition = 'none';
-});
-
-document.addEventListener('mousemove', (e) => {
-    if (!isDraggingPanel) return;
-    let x = e.clientX - panelOffsetX;
-    let y = e.clientY - panelOffsetY;
-    
-    // Bounds checking
-    const maxX = window.innerWidth - sidebar.offsetWidth;
-    const maxY = window.innerHeight - sidebar.offsetHeight;
-    if(x < 0) x = 0; if(x > maxX) x = maxX;
-    if(y < 52) y = 52; 
-    if(y > maxY) y = maxY;
-    
-    sidebar.style.left = x + 'px';
-    sidebar.style.top = y + 'px';
-});
-
-document.addEventListener('mouseup', () => {
-    if(isDraggingPanel) {
-        isDraggingPanel = false;
-        // sidebar.style.transition = 'opacity 0.2s'; // optional
-    }
-});
-
-// ─── STATE ───────────────────────────────────────────────
-let currentUser = null;
-let guestCredits = 20;
-let globalConfig = {};
-let siteConfig = {};
-let currentBgFile = null;
-let points = [];
-let maskPoints = [];
-let isDrawingMask = false;
-let draggingType = null, draggingIdx = -1;
-let dragStartX = 0, dragStartY = 0, originalPoints = [];
-let imgNaturalWidth = 1, imgNaturalHeight = 1;
-let designW = 100, designH = 100;
-
-// ─── DOM ─────────────────────────────────────────────────
-const handles = ['pt-tl','pt-tr','pt-br','pt-bl'].map(id => document.getElementById(id));
-const edges = ['edge-top','edge-right','edge-bottom','edge-left'].map(id => document.getElementById(id));
-const polyVisible = document.getElementById('poly-visible');
-const polyClip = document.getElementById('poly-clip');
-const polyMask = document.getElementById('poly-mask');
-const maskPointsGroup = document.getElementById('mask-points-group');
-const workspace = document.getElementById('workspace');
-const tshirtImg = document.getElementById('tshirt-img');
-const designImg = document.getElementById('design-img');
-const svgOverlay = document.getElementById('svg-overlay');
-
-// ─── TOASTS ──────────────────────────────────────────────
-function showToast(msg, type='success', duration=4000) {
-    const c = document.getElementById('toast-container');
-    const t = document.createElement('div');
-    t.className = `toast ${type}`;
-    const icon = type==='success'?'✅':type==='error'?'❌':'⚠️';
-    t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
-    c.appendChild(t);
-    setTimeout(() => { t.style.animation = 'slideOut 0.3s ease forwards'; setTimeout(()=>t.remove(), 300); }, duration);
-}
-
-// ─── LOADER ──────────────────────────────────────────────
-function showLoader(text='Processing...') {
-    document.getElementById('loader-text').innerText = text;
-    document.getElementById('loader').classList.add('open');
-}
-function hideLoader() { document.getElementById('loader').classList.remove('open'); }
-
-// ─── TABS ────────────────────────────────────────────────
-function switchTab(tab) {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === `tab-${tab}`));
-    const sidebar = document.getElementById('sidebar');
-    sidebar.style.display = tab === 'editor' ? 'flex' : 'none';
-    if (tab === 'gallery') loadGallery();
-    if (tab === 'pricing') loadPricing();
-    if (tab === 'dashboard') loadDashboard();
-}
-document.querySelectorAll('.nav-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
-
-// ─── AUTH ─────────────────────────────────────────────────
-async function loadMe() {
-    const res = await fetch('/api/auth/me');
-    const data = await res.json();
-    currentUser = data.user;
-    if (data.guest_credits !== undefined) guestCredits = data.guest_credits;
-    updateUserUI();
-    // Auth is optional — guests can use the tool freely
-}
-function updateUserUI() {
-    const av = document.getElementById('user-avatar-btn');
-    const loginBtn = document.getElementById('nav-login-btn');
-    if (!currentUser) {
-        av.style.display = 'none';
-        loginBtn.style.display = 'block';
-        document.getElementById('credit-count').textContent = guestCredits;
-        document.getElementById('dd-name').textContent = 'Guest';
-        document.getElementById('dd-email').textContent = 'Not signed in';
-        document.getElementById('stat-credits').textContent = guestCredits;
-        document.getElementById('stat-plan').textContent = 'GUEST';
-        document.getElementById('stat-plan').className = 'badge badge-warning';
-        document.getElementById('stat-generated').textContent = '—';
-        document.getElementById('welcome-msg').textContent = 'Welcome to Mockup Studio! 👋';
-        document.getElementById('admin-link').style.display = 'none';
-        document.getElementById('logout-btn').textContent = '→ Sign In';
-        document.getElementById('logout-btn').onclick = showAuthModal;
-        document.getElementById('logout-btn').className = 'user-dropdown-item';
-        return;
-    }
-    av.style.display = 'flex';
-    loginBtn.style.display = 'none';
-    av.textContent = currentUser.name[0].toUpperCase();
-    document.getElementById('credit-count').textContent = currentUser.credits;
-    document.getElementById('dd-name').textContent = currentUser.name;
-    document.getElementById('dd-email').textContent = currentUser.email;
-    document.getElementById('stat-credits').textContent = currentUser.credits;
-    document.getElementById('stat-plan').textContent = currentUser.plan.toUpperCase();
-    document.getElementById('stat-plan').className = `badge badge-${currentUser.plan === 'business' ? 'teal' : currentUser.plan === 'pro' ? 'purple' : 'warning'}`;
-    document.getElementById('stat-generated').textContent = currentUser.total_generated || 0;
-    document.getElementById('welcome-msg').textContent = `Welcome back, ${currentUser.name}! 👋`;
-    if (currentUser.is_admin) document.getElementById('admin-link').style.display = 'flex';
-    document.getElementById('logout-btn').textContent = '↩ Sign Out';
-    document.getElementById('logout-btn').onclick = doLogout;
-    const warn = document.getElementById('credit-warning');
-    warn.classList.toggle('show', currentUser.credits < 10);
-}
-function showAuthModal() { document.getElementById('auth-modal').classList.add('open'); }
-function hideAuthModal() { document.getElementById('auth-modal').classList.remove('open'); }
-function toggleUserMenu() { document.getElementById('user-dropdown').classList.toggle('open'); }
-document.addEventListener('click', e => {
-    const dd = document.getElementById('user-dropdown');
-    const btn = document.getElementById('user-avatar-btn');
-    if (!dd.contains(e.target) && !btn.contains(e.target)) dd.classList.remove('open');
-});
-document.querySelectorAll('.modal-tab').forEach(t => {
-    t.addEventListener('click', () => {
-        document.querySelectorAll('.modal-tab').forEach(x => x.classList.toggle('active', x === t));
-        document.querySelectorAll('.modal-form').forEach(f => f.classList.toggle('active', f.id === `${t.dataset.authtab}-form`));
-    });
-});
-document.getElementById('login-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const res = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email: document.getElementById('login-email').value, password: document.getElementById('login-password').value }) });
-    const data = await res.json();
-    if (data.error) { showToast(data.error, 'error'); return; }
-    currentUser = data.user;
-    document.getElementById('auth-modal').classList.remove('open');
-    updateUserUI(); showToast('Welcome back! 🎉');
-});
-document.getElementById('register-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const res = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name: document.getElementById('reg-name').value, email: document.getElementById('reg-email').value, password: document.getElementById('reg-password').value }) });
-    const data = await res.json();
-    if (data.error) { showToast(data.error, 'error'); return; }
-    currentUser = data.user;
-    document.getElementById('auth-modal').classList.remove('open');
-    updateUserUI(); showToast(`Welcome! You got ${data.user.credits} free credits 🎉`);
-});
-async function doLogout() {
-    await fetch('/api/auth/logout', {method:'POST'});
-    currentUser = null; document.getElementById('user-dropdown').classList.remove('open');
-    showAuthModal();
-}
-
-// ─── SITE CONFIG & ADS ────────────────────────────────────
-async function loadSiteConfig() {
-    const res = await fetch('/api/site-config');
-    siteConfig = await res.json();
-    renderAds();
-}
-function renderAds() {
-    if (!currentUser || currentUser.plan === 'free') {
-        if (siteConfig.adsense_enabled && siteConfig.adsense_client_id) {
-            const script = document.createElement('script');
-            script.async = true;
-            script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${siteConfig.adsense_client_id}`;
-            script.crossOrigin = 'anonymous';
-            document.head.appendChild(script);
-        }
-        if (siteConfig.sponsor_enabled && siteConfig.sponsor_banner_html) {
-            document.getElementById('sidebar-ad').innerHTML = siteConfig.sponsor_banner_html;
-            document.getElementById('dashboard-ad').innerHTML = siteConfig.sponsor_banner_html;
-        }
-    }
-}
-
-// ─── DASHBOARD ───────────────────────────────────────────
-async function loadDashboard() {
-    const res = await fetch('/api/gallery');
-    const files = await res.json();
-    document.getElementById('stat-output').textContent = files.length;
-}
-
-// ─── EDITOR ──────────────────────────────────────────────
-async function deleteFile(type, filename, e) {
-    e.stopPropagation();
-    if (!confirm(`Delete "${filename}"?`)) return;
-    const res = await fetch('/api/delete', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({type, filename})
-    });
-    const data = await res.json();
-    if (data.status === 'success') {
-        showToast(`"${filename}" deleted`);
-        if (type === 'background') { loadBackgrounds(); if (currentBgFile === filename) { currentBgFile = null; workspace.style.display = 'none'; document.getElementById('workspace-placeholder').style.display = 'flex'; } }
-        else loadDesigns();
-    } else {
-        showToast(data.error || 'Delete failed', 'error');
-    }
-}
-
-async function loadBackgrounds() {
-    const res = await fetch('/api/backgrounds');
-    const files = await res.json();
-    const list = document.getElementById('bg-list');
-    list.innerHTML = '';
-    if (!files.length) { list.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text-muted)">No templates yet</div>'; updateGenerateCost(); return; }
-    files.forEach(file => {
-        const item = document.createElement('div');
-        item.className = 'file-item';
-        if (file === currentBgFile) item.classList.add('selected');
-        item.innerHTML = `<img class="file-thumb" src="/backgrounds/${encodeURIComponent(file)}" onerror="this.style.display='none'"><span class="file-name" title="${file}">${file}</span><button class="del-btn" title="Delete">🗑</button>`;
-        item.querySelector('.file-name').onclick = () => { document.querySelectorAll('#bg-list .file-item').forEach(x=>x.classList.remove('selected')); item.classList.add('selected'); selectBackground(file); };
-        item.querySelector('.del-btn').onclick = (e) => deleteFile('background', file, e);
-        list.appendChild(item);
-    });
-    updateGenerateCost();
-}
-
-async function loadDesigns() {
-    const res = await fetch('/api/designs');
-    const files = await res.json();
-    const list = document.getElementById('design-list');
-    list.innerHTML = '';
-    if (!files.length) { list.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text-muted)">No designs yet. Upload above.</div>'; updateGenerateCost(); return; }
-    files.forEach(file => {
-        const item = document.createElement('div');
-        item.className = 'file-item';
-        item.innerHTML = `<img class="file-thumb" src="/tasarim/${encodeURIComponent(file)}" onerror="this.style.display='none'"><span class="file-name" title="${file}">${file}</span><button class="del-btn" title="Delete">🗑</button>`;
-        item.querySelector('.del-btn').onclick = (e) => deleteFile('design', file, e);
-        // Click to set as preview
-        item.querySelector('.file-name').onclick = () => {
-            const url = `/tasarim/${encodeURIComponent(file)}`;
-            designImg.onload = () => { designW = designImg.naturalWidth; designH = designImg.naturalHeight; designImg.style.display = 'block'; designImg.style.width = designW + 'px'; designImg.style.height = designH + 'px'; updateUI(); };
-            designImg.src = url;
-            showToast(`Preview: ${file}`);
-        };
-        list.appendChild(item);
-    });
-    updateGenerateCost();
-}
-
-function updateGenerateCost() {
-    const bgCount = document.querySelectorAll('#bg-list .file-item').length;
-    const designCount = document.querySelectorAll('#design-list .file-item').length;
-    const total = bgCount * designCount;
-    const cost = total * 2;
-    const lbl = document.getElementById('generate-cost-label');
-    if (lbl) {
-        lbl.textContent = total > 0 ? `Cost: ${cost} credits (${total} mockups)` : 'Upload templates & designs';
-    }
-}
-async function loadConfig() {
-    const res = await fetch('/api/config');
-    globalConfig = await res.json();
-}
-function selectBackground(filename) {
-    currentBgFile = filename;
-    document.getElementById('workspace-placeholder').style.display = 'none';
-    workspace.style.display = 'inline-block';
-    tshirtImg.onload = () => {
-        imgNaturalWidth = tshirtImg.naturalWidth;
-        imgNaturalHeight = tshirtImg.naturalHeight;
-        svgOverlay.style.display = 'block';
-        handles.forEach(h => h.style.display = 'block');
-        const rect = tshirtImg.getBoundingClientRect();
-        const sx = rect.width / imgNaturalWidth, sy = rect.height / imgNaturalHeight;
-        if (globalConfig[filename] && globalConfig[filename].points) {
-            points = globalConfig[filename].points.map(p => ({x: p[0]*sx, y: p[1]*sy}));
-            maskPoints = (globalConfig[filename].mask_points || []).map(p => ({x: p[0]*sx, y: p[1]*sy}));
-        } else {
-            const w = rect.width, h = rect.height;
-            points = [{x:w*.3,y:h*.3},{x:w*.7,y:h*.3},{x:w*.7,y:h*.7},{x:w*.3,y:h*.7}];
-            maskPoints = [];
-        }
-        updateUI();
-    };
-    tshirtImg.src = `/backgrounds/${encodeURIComponent(filename)}`;
-}
-
-// Warp math
-function solveLinearSystem(A, b) {
-    var n=A.length; for(var i=0;i<n;i++)A[i].push(b[i]);
-    for(var i=0;i<n;i++){var m=Math.abs(A[i][i]),r=i;for(var k=i+1;k<n;k++)if(Math.abs(A[k][i])>m){m=Math.abs(A[k][i]);r=k;}for(var k=i;k<n+1;k++){var t=A[r][k];A[r][k]=A[i][k];A[i][k]=t;}for(var k=i+1;k<n;k++){var c=-A[k][i]/A[i][i];for(var j=i;j<n+1;j++){if(i===j)A[k][j]=0;else A[k][j]+=c*A[i][j];}}}
-    var x=new Array(n);for(var i=n-1;i>=0;i--){x[i]=A[i][n]/A[i][i];for(var k=i-1;k>=0;k--)A[k][n]-=A[k][i]*x[i];}return x;
-}
-function updateUI() {
-    handles.forEach((h,i) => { h.style.left=points[i].x+'px'; h.style.top=points[i].y+'px'; });
-    const ps = points.map(p=>`${p.x},${p.y}`).join(' ');
-    polyVisible.setAttribute('points', ps);
-    if (maskPoints.length > 0) {
-        const ms = maskPoints.map(p=>`${p.x},${p.y}`).join(' ');
-        polyMask.setAttribute('points', ms);
-        polyClip.setAttribute('points', maskPoints.length>=3 ? ms : '-1000,-1000 10000,-1000 10000,10000 -1000,10000');
-    } else {
-        polyMask.setAttribute('points','');
-        polyClip.setAttribute('points','-1000,-1000 10000,-1000 10000,10000 -1000,10000');
-    }
-    maskPointsGroup.innerHTML='';
-    maskPoints.forEach(p => {
-        const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-        c.setAttribute('cx',p.x);c.setAttribute('cy',p.y);c.setAttribute('r',5);c.setAttribute('class','mask-point');
-        maskPointsGroup.appendChild(c);
-    });
-    edges[0].setAttribute('x1',points[0].x);edges[0].setAttribute('y1',points[0].y);edges[0].setAttribute('x2',points[1].x);edges[0].setAttribute('y2',points[1].y);
-    edges[1].setAttribute('x1',points[1].x);edges[1].setAttribute('y1',points[1].y);edges[1].setAttribute('x2',points[2].x);edges[1].setAttribute('y2',points[2].y);
-    edges[2].setAttribute('x1',points[2].x);edges[2].setAttribute('y1',points[2].y);edges[2].setAttribute('x2',points[3].x);edges[2].setAttribute('y2',points[3].y);
-    edges[3].setAttribute('x1',points[3].x);edges[3].setAttribute('y1',points[3].y);edges[3].setAttribute('x2',points[0].x);edges[3].setAttribute('y2',points[0].y);
-    if (designImg.src && designImg.style.display!=='none' && designW>0) {
-        var src=[{x:0,y:0},{x:designW,y:0},{x:designW,y:designH},{x:0,y:designH}];
-        var a=[],b_=[];
-        for(var i=0;i<4;i++){a.push([src[i].x,src[i].y,1,0,0,0,-src[i].x*points[i].x,-src[i].y*points[i].x]);b_.push(points[i].x);a.push([0,0,0,src[i].x,src[i].y,1,-src[i].x*points[i].y,-src[i].y*points[i].y]);b_.push(points[i].y);}
-        var x=solveLinearSystem(a,b_);
-        designImg.style.transform=`matrix3d(${[x[0],x[3],0,x[6],x[1],x[4],0,x[7],0,0,1,0,x[2],x[5],0,1].join(',')})`;
-    }
-}
-
-// Drag logic
-handles.forEach((h,idx) => {
-    h.addEventListener('mousedown', e => { if(isDrawingMask)return; draggingType='point'; draggingIdx=idx; e.stopPropagation(); });
-});
-edges.forEach((edge,idx) => {
-    edge.addEventListener('mousedown', e => { if(isDrawingMask)return; draggingType='edge'; draggingIdx=idx; dragStartX=e.clientX; dragStartY=e.clientY; originalPoints=points.map(p=>({...p})); e.stopPropagation(); });
-});
-polyVisible.addEventListener('mousedown', e => { if(isDrawingMask)return; draggingType='poly'; dragStartX=e.clientX; dragStartY=e.clientY; originalPoints=points.map(p=>({...p})); e.stopPropagation(); });
-document.addEventListener('mousemove', e => {
-    if(!draggingType) return;
-    const r=workspace.getBoundingClientRect();
-    const nx=e.clientX-r.left, ny=e.clientY-r.top;
-    if(draggingType==='point'){ points[draggingIdx].x=nx; points[draggingIdx].y=ny; }
-    else { const dx=e.clientX-dragStartX, dy=e.clientY-dragStartY; const idxs=draggingType==='poly'?[0,1,2,3]:[[0,1],[1,2],[2,3],[3,0]][draggingIdx]; idxs.forEach(i=>{points[i].x=originalPoints[i].x+dx; points[i].y=originalPoints[i].y+dy;}); }
-    updateUI();
-});
-document.addEventListener('mouseup', () => { draggingType=null; });
-
-workspace.addEventListener('mousedown', e => {
-    if(!isDrawingMask) return;
-    const r=workspace.getBoundingClientRect();
-    maskPoints.push({x:e.clientX-r.left, y:e.clientY-r.top});
-    updateUI();
-});
-
-// Mask controls
-const btnDrawMask = document.getElementById('btn-draw-mask');
-btnDrawMask.addEventListener('click', () => {
-    isDrawingMask = !isDrawingMask;
-    if(isDrawingMask){
-        btnDrawMask.textContent='✅ Finish Mask';
-        btnDrawMask.className='btn btn-success btn-sm';
-        workspace.style.cursor='crosshair';
-        polyVisible.style.pointerEvents='none';
-        handles.forEach(h=>h.style.pointerEvents='none');
-        edges.forEach(e=>e.style.pointerEvents='none');
-    } else {
-        btnDrawMask.textContent='✂️ Draw Mask';
-        btnDrawMask.className='btn btn-danger btn-sm';
-        workspace.style.cursor='default';
-        polyVisible.style.pointerEvents='fill';
-        handles.forEach(h=>h.style.pointerEvents='auto');
-        edges.forEach(e=>e.style.pointerEvents='fill');
-    }
-});
-document.getElementById('btn-clear-mask').addEventListener('click', () => { maskPoints=[]; updateUI(); });
-
-// Save settings
-document.getElementById('btn-save').addEventListener('click', async () => {
-    if(!currentBgFile){ showToast('Select a template first', 'warning'); return; }
-    const sx=imgNaturalWidth/tshirtImg.width, sy=imgNaturalHeight/tshirtImg.height;
-    const rp=points.map(p=>[Math.round(p.x*sx),Math.round(p.y*sy)]);
-    const rm=maskPoints.map(p=>[Math.round(p.x*sx),Math.round(p.y*sy)]);
-    const payload={[currentBgFile]:{"points":rp}};
-    if(rm.length>=3) payload[currentBgFile].mask_points=rm;
-    showLoader('Saving...');
-    await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-    await loadConfig(); hideLoader(); showToast('Settings saved! ✅');
-});
-
-// Generate
-async function doGenerate() {
-    showLoader('Generating mockups... This may take a moment ⚡');
-    const res=await fetch('/api/generate',{method:'POST'});
-    const data=await res.json();
-    hideLoader();
-    if(data.status==='success'){
-        if (currentUser) { currentUser.credits -= (data.cost||0); }
-        else { guestCredits -= (data.cost||0); }
-        updateUserUI();
-        showToast(`Done! ${data.total||0} mockups created! 🎉`);
-        loadDashboard();
-        if (!currentUser || currentUser.plan==='free') {
-            const adHtml = siteConfig.sponsor_banner_html || '';
-            if(adHtml) document.getElementById('dashboard-ad').innerHTML = adHtml;
-        }
-    } else {
-        showToast(data.message||'Generation failed', 'error');
-    }
-}
-document.getElementById('btn-generate').addEventListener('click', doGenerate);
-function quickGenerate() { switchTab('editor'); setTimeout(doGenerate, 100); }
-
-// Design preview
-let currentDesignFileObj = null;
-document.getElementById('upload-design').addEventListener('change', e => {
-    const file=e.target.files[0]; if(!file)return;
-    currentDesignFileObj = file;
-    const url=URL.createObjectURL(file);
-    designImg.onload=()=>{ designW=designImg.naturalWidth; designH=designImg.naturalHeight; designImg.style.display='block'; designImg.style.width=designW+'px'; designImg.style.height=designH+'px'; updateUI(); };
-    designImg.src=url;
-});
-
-// Bulk design upload
-document.getElementById('upload-designs-bulk').addEventListener('change', async e => {
-    const files=e.target.files; if(!files.length)return;
-    showLoader(`Uploading ${files.length} design(s)...`);
-    for(const file of files){
-        const fd=new FormData(); fd.append('file',file); fd.append('type','design');
-        await fetch('/api/upload',{method:'POST',body:fd});
-    }
-    hideLoader(); showToast(`${files.length} design(s) uploaded! Ready to generate.`); e.target.value='';
-});
-
-// Upload background
-document.getElementById('upload-bg').addEventListener('change', async e => {
-    const file=e.target.files[0]; if(!file)return;
-    const fd=new FormData(); fd.append('file',file); fd.append('type','background');
-    showLoader('Uploading template...'); await fetch('/api/upload',{method:'POST',body:fd});
-    await loadBackgrounds(); hideLoader(); showToast('Template uploaded!');
-});
-
-// Remove BG (Upload New)
-document.getElementById('upload-rembg').addEventListener('change', async e => {
-    const file=e.target.files[0]; if(!file)return;
-    const fd=new FormData(); fd.append('file',file);
-    showLoader('AI is removing background... (first use may take 15-20s)');
-    const res=await fetch('/api/remove-bg',{method:'POST',body:fd});
-    const data=await res.json(); hideLoader();
-    if(data.status==='success'){ if(currentUser) currentUser.credits-=2; else guestCredits-=2; updateUserUI(); showToast(`Background removed! Saved as ${data.filename}`); }
-    else showToast(data.error||'Failed', 'error');
-});
-
-// Remove BG (Current Active Design)
-document.getElementById('btn-rembg-current').addEventListener('click', async () => {
-    if(!currentDesignFileObj) { showToast('Please preview a design first!', 'warning'); return; }
-    const fd=new FormData(); fd.append('file', currentDesignFileObj);
-    showLoader('AI is removing background... (first use may take 15-20s)');
-    const res=await fetch('/api/remove-bg',{method:'POST',body:fd});
-    const data=await res.json(); hideLoader();
-    if(data.status==='success'){
-        if(currentUser) currentUser.credits-=2; else guestCredits-=2;
-        updateUserUI(); 
-        showToast(`Background removed!`);
-        // Update the active canvas image
-        designImg.src = `/tasarim/${encodeURIComponent(data.filename)}`;
-    }
-    else showToast(data.error||'Failed', 'error');
-});
-
-// ─── GALLERY ─────────────────────────────────────────────
-async function loadGallery() {
-    const grid=document.getElementById('gallery-grid');
-    grid.innerHTML='<div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;text-align:center;padding:40px;">Loading...</div>';
-    const res=await fetch('/api/gallery');
-    const files=await res.json();
-    if(!files.length){ grid.innerHTML='<div style="color:var(--text-muted);font-size:13px;grid-column:1/-1;text-align:center;padding:40px;">No mockups generated yet. Go to the Editor tab to get started!</div>'; return; }
-    grid.innerHTML='';
-    files.forEach(file => {
-        const item=document.createElement('div');
-        item.className='gallery-item';
-        item.innerHTML=`<img src="/output/${encodeURIComponent(file)}" alt="${file}" loading="lazy"><div class="overlay"><a href="/output/${encodeURIComponent(file)}" download="${file}" class="btn btn-primary btn-sm" style="width:auto;">⬇ Download</a></div>`;
-        grid.appendChild(item);
-    });
-}
-document.getElementById('refresh-gallery-btn').addEventListener('click', loadGallery);
-
-// ─── PRICING ─────────────────────────────────────────────
-function loadPricing() {
-    const plans=siteConfig.plans||{};
-    const grid=document.getElementById('pricing-grid');
-    grid.innerHTML='';
-    const planOrder=['free','pro','business'];
-    planOrder.forEach(key => {
-        const p=plans[key]; if(!p)return;
-        const isFeatured=key==='pro';
-        const isPro=key==='pro', isBiz=key==='business';
-        const features={
-            free:['20 credits on signup','1 credit per mockup','2 credits for AI BG removal','Basic templates'],
-            pro:['500 credits/month','All free features','Ad-free experience','Priority support'],
-            business:['Unlimited credits','All pro features','Commercial license','API access (coming soon)']
-        };
-        const card=document.createElement('div');
-        card.className=`pricing-card${isFeatured?' featured':''}`;
-        card.innerHTML=`
-            <div class="plan-name">${p.name}</div>
-            <div class="plan-price">${p.price===0?'Free':'$'+p.price}<span>${p.price>0?'/month':''}</span></div>
-            <div class="plan-credits">⚡ ${p.credits===9999?'Unlimited':p.credits+' credits'}</div>
-            <ul class="plan-features">${(features[key]||[]).map(f=>`<li>${f}</li>`).join('')}</ul>
-            <button class="btn ${isFeatured?'btn-primary':isBiz?'btn-success':'btn-ghost'}" onclick="showToast('Payment integration coming soon! 🚀','warning')">
-                ${p.price===0?'Current Plan':'Upgrade → $'+p.price+'/mo'}
-            </button>`;
-        grid.appendChild(card);
-    });
-
-    // Credit packages
-    const pkgGrid=document.getElementById('credit-packages-grid');
-    pkgGrid.innerHTML='';
-    (siteConfig.credit_packages||[]).forEach(pkg => {
-        const card=document.createElement('div');
-        card.className='card';
-        card.style.textAlign='center';
-        card.style.cursor='pointer';
-        card.innerHTML=`<div style="font-size:28px;font-weight:800;color:var(--purple-light)">⚡ ${pkg.credits}</div><div style="font-size:13px;color:var(--text-muted);margin:4px 0 16px;">credits</div><button class="btn btn-primary btn-sm" onclick="showToast('Payment integration coming soon! 🚀','warning')">$${pkg.price}</button>`;
-        pkgGrid.appendChild(card);
-    });
-
-    // Cost reference
-    const costList=document.getElementById('credit-costs-list');
-    const costs=siteConfig.credit_costs||{};
-    costList.innerHTML=[
-        {label:'Generate 1 mockup', key:'generate_single'},
-        {label:'Bulk generation (10+)', key:'generate_bulk'},
-        {label:'AI Background Removal', key:'remove_bg'}
-    ].map(r=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--text-secondary)">${r.label}</span><span class="badge badge-purple">⚡ ${costs[r.key]||'—'} credits</span></div>`).join('');
-}
-
-// ─── INIT ─────────────────────────────────────────────────
-async function init() {
-    await loadSiteConfig();
-    await loadMe();
-    await loadConfig();
-    await loadBackgrounds();
-    await loadDesigns();
-    loadDashboard();
-}
-init();
-</script>
+<script src="/static/js/main.js"></script>
 </body>
 </html>

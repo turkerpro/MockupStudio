@@ -241,6 +241,36 @@ def gallery():
     files.sort(key=lambda x: os.path.getmtime(os.path.join(app.config['OUTPUT_FOLDER'], x)), reverse=True)
     return jsonify(files)
 
+@app.route('/api/backgrounds/<path:filename>', methods=['DELETE'])
+def delete_background(filename):
+    if filename.lower() == 'canvas.png':
+        return jsonify({'error': 'Cannot delete canvas.png'}), 403
+    path = os.path.join(app.config['BACKGROUNDS_FOLDER'], filename)
+    if os.path.exists(path):
+        os.remove(path)
+        # Also remove from config
+        cfg = load_json(app.config['CONFIG_FILE'])
+        cfg.pop(filename, None)
+        save_json(app.config['CONFIG_FILE'], cfg)
+    return jsonify({'status': 'success'})
+
+@app.route('/api/designs/<path:filename>', methods=['DELETE'])
+def delete_design(filename):
+    path = os.path.join(app.config['TASARIM_FOLDER'], filename)
+    if os.path.exists(path):
+        os.remove(path)
+    return jsonify({'status': 'success'})
+
+@app.route('/api/dashboard', methods=['GET'])
+def dashboard():
+    u = current_user()
+    output_files = len([f for f in os.listdir(app.config['OUTPUT_FOLDER']) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
+    resp = {'output_files': output_files}
+    if u:
+        resp['credits'] = u.get('credits', 0)
+        resp['total_generated'] = u.get('total_generated', 0)
+    return jsonify(resp)
+
 @app.route('/api/config', methods=['GET', 'POST'])
 def handle_config():
     if request.method == 'GET':
@@ -260,8 +290,8 @@ def generate_mockups():
     site_cfg = load_json(app.config['SITE_CONFIG_FILE'])
     costs = site_cfg.get('credit_costs', {})
     
-    design_count = len([f for f in os.listdir(app.config['TASARIM_FOLDER']) if f.lower().endswith('.png')])
-    bg_count = len([f for f in os.listdir(app.config['BACKGROUNDS_FOLDER']) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
+    design_count = len([f for f in os.listdir(app.config['TASARIM_FOLDER']) if f.lower().endswith('.png') and 'canvas' not in f.lower()])
+    bg_count = len([f for f in os.listdir(app.config['BACKGROUNDS_FOLDER']) if f.lower().endswith(('.jpg', '.jpeg', '.png')) and f.lower() != 'canvas.png'])
     total = design_count * bg_count
     
     # Every mockup costs exactly 2 credits
@@ -293,6 +323,79 @@ def generate_mockups():
             session['guest_credits'] += cost
             session.modified = True
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/api/generate-stream', methods=['GET'])
+def generate_stream():
+    """SSE endpoint - streams real-time progress while generating mockups."""
+    import sys
+
+    u = current_user()
+    site_cfg = load_json(app.config['SITE_CONFIG_FILE'])
+
+    design_count = len([f for f in os.listdir(app.config['TASARIM_FOLDER'])
+                         if f.lower().endswith('.png') and 'canvas' not in f.lower()])
+    config_data = load_json(app.config['CONFIG_FILE'])
+    bg_count = len([f for f in os.listdir(app.config['BACKGROUNDS_FOLDER'])
+                    if f.lower().endswith(('.jpg', '.jpeg', '.png'))
+                    and f.lower() != 'canvas.png'
+                    and f in config_data and len(config_data[f].get('points', [])) == 4])
+    total = design_count * bg_count
+    cost = total * 2
+
+    # Credit check
+    if u:
+        ok, msg = deduct_credits(u['id'], cost, 'generate')
+        if not ok:
+            def err_gen():
+                yield f"data: {{\"status\":\"error\",\"message\":\"{msg}\"}}\n\n"
+            return app.response_class(err_gen(), mimetype='text/event-stream')
+    else:
+        if 'guest_credits' not in session:
+            session['guest_credits'] = 20
+        if session['guest_credits'] < cost:
+            def err_gen2():
+                yield f"data: {{\"status\":\"error\",\"message\":\"Not enough credits\"}}\n\n"
+            return app.response_class(err_gen2(), mimetype='text/event-stream')
+        session['guest_credits'] -= cost
+        session.modified = True
+
+    def generate():
+        proc = subprocess.Popen(
+            ['python', '-u', 'generate.py'],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            text=True, bufsize=1
+        )
+        detected_total = total
+        try:
+            for line in proc.stdout:
+                line = line.strip()
+                if line.startswith('TOTAL:'):
+                    try:
+                        detected_total = int(line.split(':')[1])
+                    except:
+                        pass
+                elif line.startswith('PROGRESS:'):
+                    parts = line.split(':')
+                    if len(parts) == 3:
+                        done = int(parts[1])
+                        t = int(parts[2])
+                        pct = round(done / t * 100) if t > 0 else 0
+                        import json as _json
+                        yield f"data: {_json.dumps({'done': done, 'total': t, 'pct': pct})}\n\n"
+            proc.wait()
+            if u:
+                u_fresh = find_user_by_id(u['id'])
+                update_user(u['id'], {'total_generated': u_fresh.get('total_generated', 0) + detected_total})
+            import json as _json
+            yield f"data: {_json.dumps({'status': 'success', 'done': detected_total, 'total': detected_total, 'pct': 100, 'cost': cost})}\n\n"
+        except Exception as e:
+            import json as _json
+            yield f"data: {_json.dumps({'status': 'error', 'message': str(e)})}\n\n"
+
+    resp = app.response_class(generate(), mimetype='text/event-stream')
+    resp.headers['Cache-Control'] = 'no-cache'
+    resp.headers['X-Accel-Buffering'] = 'no'
+    return resp
 
 @app.route('/api/remove-bg', methods=['POST'])
 @login_required
@@ -338,6 +441,8 @@ def upload_file():
 def delete_file():
     data = request.json
     filename = secure_filename(data.get('filename', ''))
+    if filename.lower() == 'canvas.png':
+        return jsonify({'error': 'Cannot delete canvas.png'}), 403
     file_type = data.get('type', '')
     if not filename:
         return jsonify({'error': 'No filename'}), 400
