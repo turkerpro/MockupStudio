@@ -314,14 +314,98 @@ document.addEventListener('mousemove',e=>{
     if(!draggingType)return;
     const dx=(e.clientX-dragStartX)/currentZoom,dy=(e.clientY-dragStartY)/currentZoom;
     const w=tshirtImg.width,h=tshirtImg.height;
+    const lockPersp = document.getElementById('lock-perspective')?.checked;
+
     if(draggingType==='handle'){
-        points[draggingIdx]={x:Math.max(0,Math.min(w,originalPoints[draggingIdx].x+dx)),y:Math.max(0,Math.min(h,originalPoints[draggingIdx].y+dy))};
+        if(lockPersp){
+            const oppIdx = (draggingIdx + 2) % 4;
+            const p_opp = originalPoints[oppIdx];
+            const diagX = originalPoints[draggingIdx].x - p_opp.x;
+            const diagY = originalPoints[draggingIdx].y - p_opp.y;
+            const mouseX = originalPoints[draggingIdx].x + dx - p_opp.x;
+            const mouseY = originalPoints[draggingIdx].y + dy - p_opp.y;
+            const dotProduct = mouseX * diagX + mouseY * diagY;
+            const diagLenSq = diagX * diagX + diagY * diagY;
+            let s = diagLenSq > 0 ? (dotProduct / diagLenSq) : 1;
+            s = Math.max(0.1, Math.min(5.0, s));
+            points = originalPoints.map(p => ({
+                x: Math.max(0, Math.min(w, p_opp.x + (p.x - p_opp.x) * s)),
+                y: Math.max(0, Math.min(h, p_opp.y + (p.y - p_opp.y) * s))
+            }));
+        } else {
+            points[draggingIdx]={x:Math.max(0,Math.min(w,originalPoints[draggingIdx].x+dx)),y:Math.max(0,Math.min(h,originalPoints[draggingIdx].y+dy))};
+        }
         updateMagnifier(e);
     }else if(draggingType==='edge'){
-        const ep=[[0,1],[1,2],[2,3],[3,0]][draggingIdx];
-        ep.forEach(pi=>{
-            points[pi]={x:Math.max(0,Math.min(w,originalPoints[pi].x+dx)),y:Math.max(0,Math.min(h,originalPoints[pi].y+dy))};
-        });
+        if(lockPersp){
+            let s = 1;
+            if(draggingIdx === 0){ // Top Edge (connects p0 and p1)
+                const dirX = (originalPoints[0].x - originalPoints[3].x + originalPoints[1].x - originalPoints[2].x) / 2;
+                const dirY = (originalPoints[0].y - originalPoints[3].y + originalPoints[1].y - originalPoints[2].y) / 2;
+                const dot = dx * dirX + dy * dirY;
+                const lenSq = dirX * dirX + dirY * dirY;
+                s = 1 + (lenSq > 0 ? (dot / lenSq) : 0);
+                s = Math.max(0.1, Math.min(5.0, s));
+                points[0] = {
+                    x: Math.max(0, Math.min(w, originalPoints[3].x + (originalPoints[0].x - originalPoints[3].x) * s)),
+                    y: Math.max(0, Math.min(h, originalPoints[3].y + (originalPoints[0].y - originalPoints[3].y) * s))
+                };
+                points[1] = {
+                    x: Math.max(0, Math.min(w, originalPoints[2].x + (originalPoints[1].x - originalPoints[2].x) * s)),
+                    y: Math.max(0, Math.min(h, originalPoints[2].y + (originalPoints[1].y - originalPoints[2].y) * s))
+                };
+            } else if(draggingIdx === 1){ // Right Edge (connects p1 and p2)
+                const dirX = (originalPoints[1].x - originalPoints[0].x + originalPoints[2].x - originalPoints[3].x) / 2;
+                const dirY = (originalPoints[1].y - originalPoints[0].y + originalPoints[2].y - originalPoints[3].y) / 2;
+                const dot = dx * dirX + dy * dirY;
+                const lenSq = dirX * dirX + dirY * dirY;
+                s = 1 + (lenSq > 0 ? (dot / lenSq) : 0);
+                s = Math.max(0.1, Math.min(5.0, s));
+                points[1] = {
+                    x: Math.max(0, Math.min(w, originalPoints[0].x + (originalPoints[1].x - originalPoints[0].x) * s)),
+                    y: Math.max(0, Math.min(h, originalPoints[0].y + (originalPoints[1].y - originalPoints[0].y) * s))
+                };
+                points[2] = {
+                    x: Math.max(0, Math.min(w, originalPoints[3].x + (originalPoints[2].x - originalPoints[3].x) * s)),
+                    y: Math.max(0, Math.min(h, originalPoints[3].y + (originalPoints[2].y - originalPoints[3].y) * s))
+                };
+            } else if(draggingIdx === 2){ // Bottom Edge (connects p2 and p3)
+                const dirX = (originalPoints[2].x - originalPoints[1].x + originalPoints[3].x - originalPoints[0].x) / 2;
+                const dirY = (originalPoints[2].y - originalPoints[1].y + originalPoints[3].y - originalPoints[0].y) / 2;
+                const dot = dx * dirX + dy * dirY;
+                const lenSq = dirX * dirX + dirY * dirY;
+                s = 1 + (lenSq > 0 ? (dot / lenSq) : 0);
+                s = Math.max(0.1, Math.min(5.0, s));
+                points[2] = {
+                    x: Math.max(0, Math.min(w, originalPoints[1].x + (originalPoints[2].x - originalPoints[1].x) * s)),
+                    y: Math.max(0, Math.min(h, originalPoints[1].y + (originalPoints[2].y - originalPoints[1].y) * s))
+                };
+                points[3] = {
+                    x: Math.max(0, Math.min(w, originalPoints[0].x + (originalPoints[3].x - originalPoints[0].x) * s)),
+                    y: Math.max(0, Math.min(h, originalPoints[0].y + (originalPoints[3].y - originalPoints[0].y) * s))
+                };
+            } else if(draggingIdx === 3){ // Left Edge (connects p3 and p0)
+                const dirX = (originalPoints[3].x - originalPoints[2].x + originalPoints[0].x - originalPoints[1].x) / 2;
+                const dirY = (originalPoints[3].y - originalPoints[2].y + originalPoints[0].y - originalPoints[1].y) / 2;
+                const dot = dx * dirX + dy * dirY;
+                const lenSq = dirX * dirX + dirY * dirY;
+                s = 1 + (lenSq > 0 ? (dot / lenSq) : 0);
+                s = Math.max(0.1, Math.min(5.0, s));
+                points[3] = {
+                    x: Math.max(0, Math.min(w, originalPoints[2].x + (originalPoints[3].x - originalPoints[2].x) * s)),
+                    y: Math.max(0, Math.min(h, originalPoints[2].y + (originalPoints[3].y - originalPoints[2].y) * s))
+                };
+                points[0] = {
+                    x: Math.max(0, Math.min(w, originalPoints[1].x + (originalPoints[0].x - originalPoints[1].x) * s)),
+                    y: Math.max(0, Math.min(h, originalPoints[1].y + (originalPoints[0].y - originalPoints[1].y) * s))
+                };
+            }
+        } else {
+            const ep=[[0,1],[1,2],[2,3],[3,0]][draggingIdx];
+            ep.forEach(pi=>{
+                points[pi]={x:Math.max(0,Math.min(w,originalPoints[pi].x+dx)),y:Math.max(0,Math.min(h,originalPoints[pi].y+dy))};
+            });
+        }
     }else if(draggingType==='poly'){
         points=originalPoints.map(p=>({x:Math.max(0,Math.min(w,p.x+dx)),y:Math.max(0,Math.min(h,p.y+dy))}));
     }
