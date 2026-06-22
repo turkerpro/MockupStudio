@@ -25,16 +25,21 @@ Uygulama, modern **dark-theme premium arayüz tasarımı** ve gelişmiş düzenl
   - **Custom (Serbest Oran):** Kendi özel piksel ölçülerinizi el ile girme imkanı.
 * **Heterojen Üretim Desteği:** Her şablonun kendi kategorisi ve çözünürlüğü şablon bazlı kaydedilir. Tek bir bulk üretimde tişört, kupa ve poster şablonları kendi özgün oranlarıyla aynı anda üretilebilir.
 
-### 3. Orantılı Ölçekleme Slider'ı (Design Scale)
-* Perspektif eğikliğini, açılarını ve en-boy oranını bozmadan tasarımı tam merkezinden orantılı olarak küçültüp büyütebilmeniz için **Design Scale Slider** entegre edilmiştir (%10 - %200 aralığında).
-* Köşeleri el ile çekiştirdiğinizde slider otomatik olarak `%100` değerine sıfırlanır ve yeni yerleşimi referans alır.
+### 3. Orantılı Ölçekleme & Figma Modu (Perspektifi Koru)
+* **Figma Benzeri Ölçekleme:** "Perspektifi Koru (Figma Modu)" seçeneği aktif olduğunda, köşelerden veya kenarlardan çekiştirirken en-boy oranı ve perspektif eğikliği bozulmadan Figma/Photoshop benzeri orantılı ölçekleme gerçekleştirilir.
+* **Design Scale Slider:** Perspektif eğikliğini, açılarını ve en-boy oranını bozmadan tasarımı tam merkezinden orantılı olarak küçültüp büyütebilmeniz için **Design Scale Slider** entegre edilmiştir (%10 - %200 aralığında). Köşeleri el ile çekiştirdiğinizde slider otomatik olarak `%100` değerine sıfırlanır ve yeni yerleşimi referans alır.
 
-### 4. Akıllı Maskeleme ve Kırpma Aracı
+### 4. Ekran Sınırlarının Dışına Taşabilen Çalışma Alanı (Off-boundary Dragging)
+* Perspektif alanı köşeleri veya kenarları artık şablon görselinin sınırlarına takılmaz.
+* Koordinatlar şablon görselinin dışına (negatif koordinatlara veya görsel boyutunun dışındaki alanlara) serbestçe taşabilir.
+* Sınırlarda bükülme, ezilme veya sıkışma yaşamadan taşmalı ya da geniş açılı tasarımlarınızı mükemmel şekilde yerleştirebilirsiniz.
+
+### 5. Akıllı Maskeleme ve Kırpma Aracı
 * Zoom yapıldığında kırpma koordinatlarının kayması sorunu giderilmiştir.
 * 2+ nokta eklendiğinde çizgi şeklinde maske yolunu önizleyebilirsiniz.
 * Silme esnasında tıklama kabarması (`bubbling`) engellenerek noktalar çift tetiklenme olmadan kolayca temizlenir.
 
-### 5. `canvas.png` Güvenli Dosya Koruması
+### 6. `canvas.png` Güvenli Dosya Koruması
 * Düzenlemede oran referansı sağlayan `canvas.png` dosyası API katmanında silinmeye karşı korumalıdır.
 * Şablon listesinde silme butonu gizlenmiştir.
 * Kredi maliyet hesaplamalarından, mockup adet sayımlarından ve bulk mockup üretim çıktılarından otomatik olarak hariç tutulur.
